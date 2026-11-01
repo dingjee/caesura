@@ -1,0 +1,36 @@
+name: Caesura macOS packages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR number to build (leave empty for current branch)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: macos-latest
+    env:
+      CAESURA_NATIVE_UNIVERSAL: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.pr_number && format('refs/pull/{0}/head', inputs.pr_number) || github.ref }}
+      - name: Package and verify Apple Silicon and Intel app
+        run: native/scripts/package-app.sh
+      - name: Archive signed app
+        run: ditto -c -k --sequesterRsrc --keepParent native/dist/Caesura.app native/dist/Caesura-macOS-universal.zip
+      - name: Upload native app
+        uses: actions/upload-artifact@v6
+        with:
+          name: caesura-macOS-universal-${{ github.run_id }}
+          path: native/dist/Caesura-macOS-universal.zip
+          if-no-files-found: error
+          retention-days: 30

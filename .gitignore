@@ -1,0 +1,22 @@
+.DS_Store
+dist
+.history
+.vscode
+.idea
+
+# Swift / SwiftPM build products of the Caesura macOS app
+.build/
+.swiftpm/
+Package.resolved
+*.xcodeproj
+*.xcworkspace
+native/dist/
+native/verification/screenshots/
+native/verification/logs/
+native/evidence/
+# Raw PoetryDB responses of native/scripts/curate-poems.py (the curated
+# poems.en.json itself is committed).
+native/scripts/.poetrydb-cache/
+
+# Local Python tooling cache
+.ruff_cache/

@@ -1,0 +1,126 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - विराम समय अनुस्मारक एप्लिकेशन",
+    "resumingBreaks": "पुनः ब्रेक शुरू करें",
+    "downloadLatestVersion": "नया वर्ज़न डाउनलोड करेंc",
+    "skipToTheNext": "ये छोड़ के अगले ब्रेक पे जाए",
+    "resume": "फिर शुर करें",
+    "pause": "ब्रेक्स रोको",
+    "forHour": "एक घंटे के लिए",
+    "for2Hours": "दो घंटो के लिए",
+    "for5Hours": "पांच घंटो के लिए",
+    "untilMorning": "सुबह तक",
+    "indefinitely": "अनिश्चित काल के लिए",
+    "resetBreaks": "ब्रेक्स पुनः कायम करें",
+    "quitCaesura": "स्ट्रेचली बंद करें",
+    "preferences": "सेट्टिंग्स",
+    "toMicrobreak": "छोटा ब्रेक",
+    "microbreakIn": "छोटा ब्रेक $t(utils.seconds, {'count': {{seconds}} }) में",
+    "cancel": "रद्द करें",
+    "continue": "जारी रखें",
+    "warning": "यह डिफॉल्ट्स को पुनर्स्थापित कर देगा और आपकी सभी सेटिंग्स खो जाएंगी।",
+    "restoreDefaults": "डिफॉल्ट्स का पुनःस्थापन",
+    "toBreak": "लंबा विराम",
+    "breakIn": "$t(utils.seconds, {'count': {{seconds}} }) सेकंड में एक लंबा विराम"
+  },
+  "break": {
+    "title": "ब्रेक लेने का समय आ गया है!",
+    "skip": "इस ब्रेक को छोड़ें",
+    "postpone": "इस विराम को टाल दे"
+  },
+  "preferences": {
+    "theme": {
+      "greenClouds": "हरे बादल",
+      "autumnBeBlessed": "शरद ऋतु",
+      "graphiteCrystal": "ग्रेफाइट क्रिस्टल",
+      "coffeeKisses": "कॉफ़ी किस्सेस",
+      "morningSwim": "सुबह का तैरना",
+      "crystalGlass": "क्रिस्टल ग्लास",
+      "windChime": "विंड चाइम",
+      "ticToc": "टिक टोक",
+      "snowWhite": "बर्फ सा सफ़ेद",
+      "invertedMonochrome": "उलटा मोनोक्रोम",
+      "monochrome": "एक रंग का",
+      "colour": "रंग",
+      "trayIcon": "मेनूबार आइकन:",
+      "enableSounds": "ध्वनियों को सक्षम करें",
+      "sounds": "ध्वनि:",
+      "transparentMode": "पारदर्शिता सक्षम करें",
+      "appearance": "अपीयरेंस:"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "checkNewVersion": "ऐप अपडेट के लिए स्वचालित रूप से जाँचते रहे",
+      "latestVersion": "नवीनतम संस्करण ",
+      "version": "संस्करण "
+    },
+    "schedule": {
+      "cantDisableBoth": "दोनों प्रकार के ब्रेक को अक्षम करना संभव नहीं है",
+      "enableStrictLong": "लंबे ब्रेक के लिए सख्त मोड सक्षम करें",
+      "enableStrictMini": "मिनी ब्रेक के लिए सख्त मोड सक्षम करें",
+      "strictModeInfo": "सख्त मोड आपको मिनी ब्रेक या लॉन्ग ब्रेक को छोड़ने से रोकता है और इसे अनुशासन में मदद करने के लिए डिज़ाइन किया गया है।",
+      "strictMode": "सख्त मोड:",
+      "enablePostponeLong": "लंबे ब्रेक के लिए स्थगन सक्षम करें",
+      "showNotificationBeforeLongBreak": "लंबा ब्रेक शुरू होने से पहले सूचना दिखाएं",
+      "enableLongBreaks": "लंबे ब्रेक सक्षम करें",
+      "longBreaksInfo": "लंबे ब्रेक नियमित रूप से कम लिए जाते हैं, लेकिन अधिक अवधि के होते हैं, जिससे आप अपने काम से अधिक समय तक ब्रेक ले सकते हैं।",
+      "longBreaks": "लम्बे ब्रेक:",
+      "enablePostponeMini": "छोटे ब्रेक के लिए स्थगन सक्षम करें",
+      "showNotificationBeforeMiniBreak": "छोटा ब्रेक शुरू होने से पहले सूचना दिखाएं",
+      "every": "हर:",
+      "breakFor": "विराम की अवधी:",
+      "enableMiniBreaks": "छोटा ब्रेक सक्षम करें",
+      "miniBreaksInfo": "मिनी ब्रेक नियमित रूप से लिए जाने वाले छोटे ब्रेक हैं जो आपको खिंचाव और आराम करने का मौका देते हैं।",
+      "miniBreaks": "छोटा ब्रेक:"
+    },
+    "settings": {
+      "restoreDefaults": "डिफॉल्ट्स का पुनःस्थापन",
+      "language": "भाषा का चयन करें:",
+      "monitorDnd": "डू नॉट डिस्टर्ब मोड में भी ब्रेक दिखाएं",
+      "monitorIdleTime": "मॉनिटर सिस्टम निष्क्रिय समय (यदि सिस्टम निष्क्रिय है तो ब्रेक रोक दिए जाते हैं)।",
+      "allScreens": "सभी मॉनिटर पर ब्रेक दिखाए",
+      "showIdeas": "ब्रेक के दौरान व्यायाम युक्तियाँ बताए",
+      "fullscreen": "फूल स्क्रीन",
+      "window": "विन्डो",
+      "showBreaksIn": "विराम दिखाने की अवधी:",
+      "openAtLogin": "लॉग इन करते समय स्ट्रेचली को प्रारंभ करें"
+    },
+    "nav": {
+      "about": "बारे में",
+      "theme": "थीम",
+      "schedule": "अनुसूची",
+      "settings": "व्यवस्था"
+    },
+    "title": "स्ट्रेचलि वरीयताएँ"
+  },
+  "process": {
+    "newVersionAvailable": "नया वर्ज़न उपलब्ध है!"
+  },
+  "utils": {
+    "hours_one": "{{count}} घंटे",
+    "hours_other": "{{count}} घंटे",
+    "minutes_one": "{{count}} मिनट",
+    "minutes_other": "{{count}} मिनट",
+    "seconds_one": "{{count}} सेकंड",
+    "seconds_other": "{{count}} सेकंड",
+    "oclock_one": "{{count}} बजे",
+    "oclock_other": "{{count}} बजे",
+    "inAbout": "लगभग {{count}} में",
+    "remaining": "{{count}} शेष है",
+    "percent_one": "{{count}} प्रतिशत",
+    "percent_other": "{{count}} प्रतिशत",
+    "none_one": "{{count}}",
+    "none_other": "{{count}}"
+  },
+  "statusMessages": {
+    "resuming": "शुरू करे",
+    "afterMiniBreak_one": "{{count}} छोटे विराम के बाद",
+    "afterMiniBreak_other": "{{count}} छोटे विरामो के बाद",
+    "nextMiniBreak": "अगला छोटा ब्रेक",
+    "nextLongBreak": "अगला लंबा ब्रेक",
+    "appExclusion": "ऐप के लिए बहिष्करण नियम",
+    "dndMode": "डू नॉट डिस्टर्ब चालू है",
+    "indefinitely": "अनिश्चित काल के लिए",
+    "paused": "रोके गए"
+  }
+}

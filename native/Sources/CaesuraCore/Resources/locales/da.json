@@ -1,0 +1,128 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - Pause påmindelses app",
+    "microbreakIn": "Mini pause om $t(utils.seconds, {'count': {{seconds}} })",
+    "breakIn": "Pause om $t(utils.seconds, {'count': {{seconds}} })",
+    "resumingBreaks": "Genoptag pauser",
+    "downloadLatestVersion": "Hent den nyeste version",
+    "toBreak": "Pause",
+    "toMicrobreak": "Mini pause",
+    "skipToTheNext": "Spring til næste..",
+    "resume": "Genoptag",
+    "pause": "Pause Caesura",
+    "forHour": "en time",
+    "for2Hours": "2 timer",
+    "for5Hours": "5 timer",
+    "untilMorning": "Indtil imorgen",
+    "indefinitely": "For evigt",
+    "resetBreaks": "Genstart pauser",
+    "quitCaesura": "Luk Caesura",
+    "restoreDefaults": "Nulstil til standardindstillinger",
+    "warning": "Dette vil nulstille til standardindstillinger og alle dine indstillinger vil blive slettet.",
+    "continue": "Fortsæt",
+    "cancel": "Afbryd",
+    "preferences": "Indstillinger"
+  },
+  "break": {
+    "postpone": "…vent en lille smule",
+    "skip": "…nej, jeg vil bare fortsætte",
+    "title": "Tid til at holde en pause!"
+  },
+  "preferences": {
+    "title": "Caesura Indstillinger",
+    "nav": {
+      "settings": "Indstillinger",
+      "schedule": "Schedule",
+      "theme": "Tema",
+      "about": "Om os"
+    },
+    "settings": {
+      "openAtLogin": "Start Caesura automatisk når du logger ind",
+      "showBreaksIn": "Viser pauser i:",
+      "window": "Vindue",
+      "fullscreen": "Fuld skærm",
+      "showIdeas": "Vis træningstips i pauserne",
+      "allScreens": "Vis pause på alle skærme",
+      "monitorIdleTime": "Hold øje med om computeren bliver brugt eller ej (Nedtælling til pause stoppes)",
+      "monitorDnd": "Vis pauser også selvom du er i 'Ikke forstyr tilstand'",
+      "language": "Vælg sprog:",
+      "restoreDefaults": "Nulstil til standardindstillinger"
+    },
+    "schedule": {
+      "miniBreaks": "Mini pauser:",
+      "miniBreaksInfo": "Mini pauser er korte pauser som tages ofte for, at få chancen for at slappe af og strække ud.",
+      "enableMiniBreaks": "Tillad Mini pauser",
+      "breakFor": "Pause i:",
+      "every": "Hver:",
+      "showNotificationBeforeMiniBreak": "Vis notification før Mini pauser starter",
+      "enablePostponeMini": "Tillad udskydelse af Mini pauser",
+      "longBreaks": "Lang pause:",
+      "longBreaksInfo": "Lang pause tages mindre hyppigt, men er længere og tillader dig, at tage en pause fra dit arbejde.",
+      "enableLongBreaks": "Tillad Lang pauser",
+      "showNotificationBeforeLongBreak": "Vis notification før lange pauser starter",
+      "enablePostponeLong": "Tillad udskydelse af lange pauser",
+      "strictMode": "Striks tilstand:",
+      "strictModeInfo": "Striks tilstand sørger for, at du ikke kan skippe minipauser eller lange pauser.",
+      "enableStrictMini": "Tillad Striks tilstand for minipauser",
+      "enableStrictLong": "Tillad Striks tilstand for lange pauser",
+      "cantDisableBoth": "Du skal have en af mulighederne sat til"
+    },
+    "theme": {
+      "appearance": "Udseende:",
+      "sounds": "Lyde:",
+      "enableSounds": "Slå lyd til",
+      "trayIcon": "Menubar ikon:",
+      "colour": "Farve",
+      "monochrome": "Monokrom",
+      "invertedMonochrome": "invertere Monokrom",
+      "snowWhite": "Snehvidt",
+      "greenClouds": "Grønne skyer",
+      "autumnBeBlessed": "Vidunderlige efterår",
+      "graphiteCrystal": "Grafit krystal",
+      "coffeeKisses": "Kaffekys",
+      "morningSwim": "Morgen svømmetur",
+      "transparentMode": "Aktiver gennemsigtighed",
+      "crystalGlass": "Krystalglas",
+      "windChime": "vindspil",
+      "ticToc": "Tik-Tak",
+      "reverie": "Dagdrøm"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "version": "Version ",
+      "latestVersion": "Nyeste version ",
+      "notifyNewVersion": "Vis nye opdateringer automatisk",
+      "checkNewVersion": "Tjek automatisk for app opdateringer"
+    }
+  },
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "{{count}} procent",
+    "percent_other": "{{count}} procent",
+    "oclock_one": "Kl: {{count}}",
+    "oclock_other": "Kl: {{count}} ",
+    "seconds_one": "{{count}} sekund",
+    "seconds_other": "{{count}} sekunder",
+    "minutes_one": "{{count}} minut",
+    "minutes_other": "{{count}} minutter",
+    "hours_one": "{{count}} time",
+    "hours_other": "{{count}} timer",
+    "remaining": "{{count}} tilbage",
+    "inAbout": "omkring {{count}}"
+  },
+  "process": {
+    "newVersionAvailable": "Ny version er tilgængelig!"
+  },
+  "statusMessages": {
+    "paused": "Pauset",
+    "indefinitely": "På ubstemt tid",
+    "dndMode": "Ikke forstyr tilstand er slået til",
+    "nextLongBreak": "Næste Lange Pause",
+    "nextMiniBreak": "Næste Mini Pause",
+    "afterMiniBreak_one": "efter {{count}} Mini pause",
+    "afterMiniBreak_other": "efter {{count}} Mini pause",
+    "resuming": "Fortsæt",
+    "appExclusion": "App undtagelses regel"
+  }
+}

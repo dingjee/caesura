@@ -1,0 +1,128 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - La aplikaĵo por memorigi pri paŭzoj",
+    "microbreakIn": "Paŭzeto post $t(utils.seconds, {'count': {{seconds}} })",
+    "breakIn": "Longa Paŭzo post $t(utils.seconds, {'count': {{seconds}} })",
+    "resumingBreaks": "Daŭrigi paŭzojn",
+    "downloadLatestVersion": "Elŝuti la plej freŝan version",
+    "toBreak": "Longa Paŭzo",
+    "toMicrobreak": "Paŭzeto",
+    "skipToTheNext": "Iri al la sekva",
+    "resume": "Daŭrigi Paŭzojn",
+    "pause": "Paŭzigi Paŭzojn",
+    "forHour": "1 horo",
+    "for2Hours": "2 horoj",
+    "for5Hours": "5 horoj",
+    "untilMorning": "Ĝis mateno",
+    "indefinitely": "Senfine",
+    "resetBreaks": "Restarigi Paŭzojn",
+    "quitCaesura": "Forlasi Caesura",
+    "restoreDefaults": "Restaŭri la defaŭltojn",
+    "warning": "Ĉi tiu restaŭros la defaŭltojn de la aplikaĵo kaj ĉiuj viaj agordoj perdiĝos.",
+    "continue": "Daŭrigi",
+    "cancel": "Nuligi",
+    "preferences": "Agordoj"
+  },
+  "break": {
+    "postpone": "Prokrasti ĉi tiun paŭzon",
+    "skip": "Preterpasi ĉi tiun paŭzon",
+    "title": "Tempo por paŭzi!"
+  },
+  "preferences": {
+    "title": "Agordoj de Caesura",
+    "nav": {
+      "settings": "Agordoj",
+      "schedule": "Horaro",
+      "theme": "Etoso",
+      "about": "Pri"
+    },
+    "settings": {
+      "openAtLogin": "Aŭtolanĉi Caesura kiam vi ensalutas",
+      "showBreaksIn": "Montri paŭzojn:",
+      "window": "En fenestro",
+      "fullscreen": "Tutekrane",
+      "showIdeas": "Montri ekzercajn konsilojn dum paŭzoj",
+      "allScreens": "Montri paŭzojn en ĉiuj ekranoj",
+      "monitorIdleTime": "Observi senokupan tempon (Paŭzigi paŭzojn se sistemo estas senokupa).",
+      "monitorDnd": "Montri paŭzojn eĉ en senĝena reĝimo",
+      "language": "Elekti lingvon:",
+      "restoreDefaults": "Restaŭri la defaŭltojn"
+    },
+    "schedule": {
+      "miniBreaks": "Paŭzetoj:",
+      "miniBreaksInfo": "Paŭzetoj estas oftaj mallongaj paŭzoj, kiuj donas al vi ŝancon streĉi kaj malstreĉiĝi.",
+      "enableMiniBreaks": "Ŝalti Paŭzetoj",
+      "breakFor": "Paŭzi por:",
+      "every": "Ĉiujn:",
+      "showNotificationBeforeMiniBreak": "Montri sciigon antaŭ ol Paŭzeto komenciĝos",
+      "enablePostponeMini": "Ŝalti prokraston por Paŭzetoj",
+      "longBreaks": "Longaj Paŭzoj:",
+      "longBreaksInfo": "Longaj Paŭzoj estas malpli oftaj, sed estas pli longaj. Ili permesas al vi pli longan paŭzon de via laboro.",
+      "enableLongBreaks": "Ŝalti Longajn Paŭzojn",
+      "showNotificationBeforeLongBreak": "Montri sciigon antaŭ ol Longan Paŭzon komenciĝos",
+      "enablePostponeLong": "Ŝalti prokraston por Longaj Paŭzoj",
+      "strictMode": "Strikta Reĝimo:",
+      "strictModeInfo": "En Strikta Reĝimo, vi ne povas prokrasti aŭ Paŭzetojn aŭ Longajn Paŭzojn. Ĝi celas helpi disciplinon.",
+      "enableStrictMini": "Ŝalti Striktan Reĝimon por Paŭzetoj",
+      "enableStrictLong": "Ŝalti Striktan Reĝimon por Longaj Paŭzoj",
+      "cantDisableBoth": "Ne eblas malŝalti ambaŭ specojn de Paŭzoj"
+    },
+    "theme": {
+      "appearance": "Etoso:",
+      "greenClouds": "Verdaj nuboj",
+      "autumnBeBlessed": "Benita aŭtuno",
+      "graphiteCrystal": "Grafita kristalo",
+      "coffeeKisses": "Kafaj kisoj",
+      "morningSwim": "Matena naĝado",
+      "transparentMode": "Ŝalti travideblecon",
+      "sounds": "Sonoj:",
+      "enableSounds": "Ŝalti sonojn",
+      "crystalGlass": "Kristala vitro",
+      "windChime": "Ventotintilo",
+      "ticToc": "Tik tok",
+      "trayIcon": "Menubreta bildsimbolo:",
+      "colour": "Kolora",
+      "monochrome": "Unukolora",
+      "invertedMonochrome": "Inversigita unukolora",
+      "snowWhite": "Neĝblanka",
+      "reverie": "Revo"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "version": "Versio ",
+      "latestVersion": "Plej freŝa versio ",
+      "notifyNewVersion": "Aŭtomate sciigi kiam ĝisdatiginta",
+      "checkNewVersion": "Aŭtomate kontroli ĝisdatigojn de la programo"
+    }
+  },
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "{{count}} procento",
+    "percent_other": "{{count}} procentoj",
+    "oclock_one": "la {{count}}a horo",
+    "oclock_other": "la {{count}}a horo",
+    "seconds_one": "{{count}} sekundo",
+    "seconds_other": "{{count}} sekundoj",
+    "minutes_one": "{{count}} minuto",
+    "minutes_other": "{{count}} minutoj",
+    "hours_one": "{{count}} horo",
+    "hours_other": "{{count}} horoj",
+    "remaining": "{{count}} restas",
+    "inAbout": "post ĉirkaŭ {{count}}"
+  },
+  "process": {
+    "newVersionAvailable": "Freŝa versio haveblas!"
+  },
+  "statusMessages": {
+    "paused": "Paŭzita",
+    "indefinitely": "Senfine",
+    "dndMode": "Senĝena reĝimo estas aktiva",
+    "nextLongBreak": "Sekva Longa Paŭzo",
+    "nextMiniBreak": "Sekva Paŭzeto",
+    "afterMiniBreak_one": "post {{count}} Paŭzeto",
+    "afterMiniBreak_other": "post {{count}} Paŭzetoj",
+    "resuming": "Daŭriĝos",
+    "appExclusion": "Regulo por ekskluzivi aplikaĵojn"
+  }
+}

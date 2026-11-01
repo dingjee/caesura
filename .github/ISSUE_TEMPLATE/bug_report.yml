@@ -1,0 +1,117 @@
+name:            Bug Report
+description:     File a bug report.
+title: "[Bug]:   "
+body:
+- type:          markdown
+  attributes:
+    value:       |
+      Thanks for taking the time to fill out this bug report!
+      **Filling this report is required and failure to do so will result in closing the issue.**
+- type:          checkboxes
+  id:            version
+  attributes:
+    label:       Version
+    description: We only support the latest version. Find your version number at `Preferences` -  `About`.
+    options:
+    - label:     I'm using version 1.22.1
+      required:  false
+- type:          checkboxes
+  id:            known-issues
+  attributes:
+    label:       Known issues
+    description: Please check [Known issues](https://github.com/dingjee/caesura#known-issues) as it may contain a solution for your problem.
+    options:
+    - label:     I've checked Known issues
+      required:  true
+- type:          checkboxes
+  id:            open-issues
+  attributes:
+    label:       Existing issues
+    description: Please check [Existing issues](https://github.com/dingjee/caesura/issues?q=is%3Aissue) as it may contain your issue already.
+    options:
+    - label:     I've checked Existing issues
+      required:  true
+- type:          checkboxes
+  id:            advanced-preferences
+  attributes:
+    label:       Advanced Preferences
+    description: Please check [Advanced Preferences](https://github.com/dingjee/caesura#settings-and-custom-content) as it may contain a solution for your problem.
+    options:
+    - label:     I've checked Advanced Preferences
+      required:  true
+- type:          dropdown
+  attributes:
+    label:       What operating system are you using?
+    options:
+      - macOS
+  validations:
+    required:    true
+- type:          input
+  attributes:
+    label:       Operating System Version
+    description: |
+      Use Apple Menu > About This Mac. Caesura supports macOS 13 or later.
+      Include the branch/build revision and whether the Mac uses Apple Silicon or Intel.
+    placeholder: "macOS version, Apple Silicon/Intel, branch and build revision"
+  validations:
+    required:    true
+- type:          textarea
+  id:            repro
+  attributes:
+    label:       Reproduction steps
+    description: How do you trigger this bug? Please walk us through it step by step.
+    value:       |
+      1.
+      2.
+      3.
+      ...
+      **Reproduces how often:** [What percentage of the time does it reproduce?]
+  validations:
+    required:    true
+- type:          textarea
+  attributes:
+    label:       Expected Behavior
+    description: A clear and concise description of what you expected to happen.
+  validations:
+    required:    true
+- type:          textarea
+  attributes:
+    label:       Actual Behavior
+    description: A clear description of what actually happens.
+  validations:
+    required:    true
+- type:          textarea
+  id:            logs
+  attributes:
+    label:       Relevant log output
+    description: |
+      Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      [Learn here](https://github.com/dingjee/caesura#debugging) how to get logs.
+    render:      shell
+  validations:
+    required:    false
+- type:          textarea
+  id:            preferences
+  attributes:
+    label:       Preferences
+    description: |
+      Please copy and paste your preferences file if you made any changes to Preferences. This will be automatically formatted into code, so no need for backticks.
+      [Learn here](https://github.com/dingjee/caesura#debugging) how to get it.
+    render:      shell
+  validations:
+    required:    false
+- type:          textarea
+  id:            additional
+  attributes:
+    label:       Additional information
+    description: Any additional information, configuration or data that might be necessary to reproduce the issue.
+  validations:
+    required:    false
+- type:          checkboxes
+  id:            terms
+  attributes:
+    label:       Code of Conduct
+    description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/dingjee/caesura/blob/main/CODE_OF_CONDUCT.md)
+    options:
+    - label:     I agree to follow this project's Code of Conduct
+      required:  true

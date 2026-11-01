@@ -1,0 +1,126 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - A aplicación para lembrar acougar",
+    "microbreakIn": "Descanso breve en $t(utils.seconds, {'count': {{seconds}} })",
+    "breakIn": "Descanso longo en $t(utils.seconds, {'count': {{seconds}} })",
+    "resumingBreaks": "A retomar os descansos",
+    "downloadLatestVersion": "Baixar a última versión",
+    "toBreak": "Descanso longo",
+    "toMicrobreak": "Descanso breve",
+    "skipToTheNext": "Saltar ao seguinte",
+    "resume": "Retomar Descansos",
+    "pause": "Pausar Descansos",
+    "forHour": "1 hora",
+    "for2Hours": "2 horas",
+    "for5Hours": "5 horas",
+    "untilMorning": "Ata mañá",
+    "indefinitely": "Indefinidamente",
+    "resetBreaks": "Restituír descansos",
+    "quitCaesura": "Saír de Caesura",
+    "restoreDefaults": "Restituír opcións por defecto",
+    "warning": "Isto vai restituír as opcións por defecto da aplicación e perderás as que teñas configuradas.",
+    "continue": "Continuar",
+    "cancel": "Cancelar",
+    "preferences": "Configuración"
+  },
+  "break": {
+    "postpone": "Adiar este descanso",
+    "skip": "Saltar este descanso",
+    "title": "Tempo de acougar!"
+  },
+  "preferences": {
+    "title": "Configuración de Caesura",
+    "nav": {
+      "settings": "Configuración",
+      "schedule": "Horario",
+      "theme": "Tema",
+      "about": "Sobre"
+    },
+    "settings": {
+      "openAtLogin": "Abrir Caesura automáticamente ao iniciar sesión",
+      "showBreaksIn": "Amosar descansos:",
+      "window": "Nunha ventá",
+      "fullscreen": "A pantalla completa",
+      "showIdeas": "Amosar ideas de prácticas durante os descansos",
+      "allScreens": "Amosar descansos en todos os monitores",
+      "monitorIdleTime": "Supervisar a inactividade do sistema (deter os descansos si o sistema está inactivo).",
+      "monitorDnd": "Amosar descansos incluso no modo Sen molestias",
+      "language": "Escoller idioma:",
+      "restoreDefaults": "Restituír opcións por defecto"
+    },
+    "schedule": {
+      "miniBreaks": "Descansos breves:",
+      "miniBreaksInfo": "Os descansos breves son acougos curtos que se toman a miúdo para aproveitar e espreguizarse ou relaxarse.",
+      "enableMiniBreaks": "Activar Descansos breves",
+      "breakFor": "Descansar durante:",
+      "every": "Cada:",
+      "showNotificationBeforeMiniBreak": "Notificar antes de comezar un Descanso breve",
+      "enablePostponeMini": "Activar a posibilidade de saltar os Descansos breves",
+      "longBreaks": "Descansos longos:",
+      "longBreaksInfo": "Os Descansos longos teñen menor frecuencia pero miaior duración, e permiten acougar do traballo.",
+      "enableLongBreaks": "Activar Descansos longos",
+      "showNotificationBeforeLongBreak": "Notificar antes de comezar un Descanso longo",
+      "enablePostponeLong": "Activar a posibilidade de saltar os Descansos longos",
+      "strictMode": "Modo rigoroso:",
+      "strictModeInfo": "O modo rigoroso impide que saltes os Descansos breves ou longos, e está deseñado para que mellores na disciplina.",
+      "enableStrictMini": "Activar Modo rigoroso para os Descansos breves",
+      "enableStrictLong": "Actividar Modo rigoroso para os Descansos longos",
+      "cantDisableBoth": "Non se poden desactivar os dous tipos de descansos"
+    },
+    "theme": {
+      "appearance": "Aspecto:",
+      "greenClouds": "Nubes verdes",
+      "autumnBeBlessed": "Outono bendecido",
+      "graphiteCrystal": "Cristal de grafito",
+      "coffeeKisses": "Bicos de café",
+      "morningSwim": "Batuxada matutina",
+      "transparentMode": "Activar transparencia",
+      "sounds": "Sonidos:",
+      "enableSounds": "Reproducir sons",
+      "crystalGlass": "Vidro cristalino",
+      "windChime": "Asubío do vento",
+      "ticToc": "Tic, tac",
+      "trayIcon": "Icono do menú:",
+      "colour": "Cor",
+      "monochrome": "Monocromo",
+      "invertedMonochrome": "Monocromo invertido",
+      "snowWhite": "Neve branca"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "version": "Versión ",
+      "latestVersion": "Última versión ",
+      "checkNewVersion": "Comprobar actualizacións de maneira automática"
+    }
+  },
+  "utils": {
+    "remaining": "quedan {{count}}",
+    "inAbout": "máis ou menos en {{count}}",
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "{{count}} por cento",
+    "percent_other": "{{count}} por cento",
+    "oclock_one": "{{count}} en punto",
+    "oclock_other": "{{count}} en punto",
+    "seconds_one": "{{count}} segundo",
+    "seconds_other": "{{count}} segundos",
+    "minutes_one": "{{count}} minuto",
+    "minutes_other": "{{count}} minutos",
+    "hours_one": "{{count}} hora",
+    "hours_other": "{{count}} horas"
+  },
+  "process": {
+    "newVersionAvailable": "Nova versión dispoñíbel!"
+  },
+  "statusMessages": {
+    "paused": "Pausado",
+    "indefinitely": "Indefinidamente",
+    "dndMode": "Non molestar está activado",
+    "appExclusion": "Norma de exclusión dunha aplicación",
+    "nextLongBreak": "Próximo descanso longo",
+    "nextMiniBreak": "Próximo descanso breve",
+    "afterMiniBreak_one": "despois de {{count}} descanso breve",
+    "afterMiniBreak_other": "despois de {{count}} descansos breves",
+    "resuming": "A retomar"
+  }
+}

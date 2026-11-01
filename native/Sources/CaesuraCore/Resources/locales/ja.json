@@ -1,0 +1,120 @@
+{
+  "main": {
+    "microbreakIn": "$t(utils.seconds, {'count': {{seconds}} }) 後に一息入れましょう",
+    "resetBreaks": "休憩をリセット",
+    "warning": "デフォルト設定に戻すと、全てのユーザ設定は削除されます。",
+    "toMicrobreak": "小休憩",
+    "for2Hours": "2時間",
+    "for5Hours": "5時間",
+    "forHour": "1時間",
+    "toolTipHeader": "Caesura - 休憩時間リマインダアプリ",
+    "breakIn": "$t(utils.seconds, {'count': {{seconds}} })後に休憩しましょう",
+    "resumingBreaks": "休憩を再開します",
+    "downloadLatestVersion": "最新版をダウンロード",
+    "toBreak": "休憩",
+    "skipToTheNext": "休憩をスキップする",
+    "resume": "休憩を再開する",
+    "pause": "休憩を一時中断",
+    "untilMorning": "朝まで",
+    "indefinitely": "無期限",
+    "quitCaesura": "Caesuraを終了",
+    "restoreDefaults": "デフォルトに戻す",
+    "continue": "続ける",
+    "cancel": "キャンセル",
+    "preferences": "設定"
+  },
+  "preferences": {
+    "schedule": {
+      "miniBreaks": "小休憩:",
+      "longBreaks": "休憩:",
+      "showNotificationBeforeLongBreak": "休憩開始前の通知を表示する",
+      "showNotificationBeforeMiniBreak": "小休憩開始前に通知を表示する",
+      "strictModeInfo": "厳守モードは、小休憩や休憩のスキップをできなくすることで確実に休憩できるように導入されました。",
+      "miniBreaksInfo": "「小休憩」は短時間の休憩のことを指し、定期的にストレッチしてリラックスすることを促します。",
+      "enableMiniBreaks": "小休憩を有効にする",
+      "breakFor": "小休憩時間:",
+      "every": "インターバル:",
+      "enablePostponeMini": "小休憩の延期を有効にする",
+      "longBreaksInfo": "「休憩」は頻度は少ないものの長めの休息を指し、作業から離れて一服することを促します。",
+      "enableLongBreaks": "休憩を有効にする",
+      "enablePostponeLong": "休憩の延期を有効にする",
+      "strictMode": "厳守モード:",
+      "enableStrictMini": "小休憩で厳守モードを有効にする",
+      "enableStrictLong": "休憩で厳守モードを有効にする",
+      "cantDisableBoth": "小休憩および休憩の両方を無効にすることはできません"
+    },
+    "nav": {
+      "settings": "設定",
+      "schedule": "スケジュール",
+      "theme": "テーマ",
+      "about": "概要"
+    },
+    "settings": {
+      "window": "ウィンドウ",
+      "monitorIdleTime": "アイドル時間を監視する(システムがアイドル状態の場合には休憩は一時停止します)。",
+      "openAtLogin": "Caesuraをログイン時に自動起動する",
+      "showBreaksIn": "休憩画面を表示します:",
+      "fullscreen": "全画面",
+      "showIdeas": "休憩中のエクササイズのヒントを表示する",
+      "allScreens": "全てのモニターに休憩画面を表示する",
+      "monitorDnd": "Do Not Disturbモードでも休憩画面を表示する",
+      "language": "言語選択:",
+      "restoreDefaults": "デフォルト設定に戻す"
+    },
+    "theme": {
+      "ticToc": "チクタク",
+      "greenClouds": "緑の雲",
+      "appearance": "見た目:",
+      "autumnBeBlessed": "祝福の秋",
+      "graphiteCrystal": "グラファイトクリスタル",
+      "coffeeKisses": "コーヒーのキス",
+      "morningSwim": "朝の沐浴",
+      "transparentMode": "透過を有効にする",
+      "sounds": "音:",
+      "enableSounds": "音を有効にする",
+      "crystalGlass": "水晶ガラス",
+      "windChime": "ウインドチャイム",
+      "trayIcon": "メニューバーアイコン:",
+      "colour": "色",
+      "monochrome": "モノクロ",
+      "invertedMonochrome": "モノクロ反転",
+      "snowWhite": "白雪",
+      "reverie": "ほわわわ～ん"
+    },
+    "about": {
+      "checkNewVersion": "アプリを自動更新する",
+      "tagline": "A pause for poetry.",
+      "version": "バージョン ",
+      "latestVersion": "最新版 "
+    },
+    "title": "Caesuraの設定"
+  },
+  "utils": {
+    "none_other": "{{count}}",
+    "percent_other": "{{count}} ％",
+    "oclock_other": "{{count}} 時",
+    "seconds_other": "{{count}} 秒",
+    "minutes_other": "{{count}} 分",
+    "hours_other": "{{count}} 時間",
+    "remaining": "残り {{count}}",
+    "inAbout": "残り約 {{count}} 分"
+  },
+  "break": {
+    "postpone": "休憩を延期する",
+    "skip": "休憩をスキップする",
+    "title": "休憩の時間です！"
+  },
+  "process": {
+    "newVersionAvailable": "アプリに更新があります！"
+  },
+  "statusMessages": {
+    "paused": "一時停止中",
+    "appExclusion": "アプリの特別除外ルール",
+    "nextLongBreak": "次の休憩",
+    "nextMiniBreak": "次の小休憩",
+    "resuming": "継続",
+    "indefinitely": "無期限",
+    "dndMode": "Do Not Disturbが有効です",
+    "afterMiniBreak_other": "{{count}}つの小休憩後"
+  }
+}

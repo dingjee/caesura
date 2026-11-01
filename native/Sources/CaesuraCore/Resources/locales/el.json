@@ -1,0 +1,130 @@
+{
+  "main": {
+    "breakIn": "Μεγάλο διάλυμα σε $t(utils.seconds, {'count': {{seconds}} })",
+    "toolTipHeader": "Caesura - Η εφαρμογή υπενθύμισης διαλυμάτων",
+    "microbreakIn": "Μικρό διάλυμα σε $t(utils.seconds, {'count': {{seconds}} })",
+    "resumingBreaks": "Συνέχιση των διαλειμμάτων",
+    "toBreak": "Μεγάλο διάλειμμα",
+    "toMicrobreak": "Μίνι διάλειμμα",
+    "skipToTheNext": "Μετάβαση στο επόμενο",
+    "resume": "Συνέχιση διαλειμμάτων",
+    "for5Hours": "5 ώρες",
+    "untilMorning": "Μέχρι το πρωί",
+    "indefinitely": "Επ' αόριστον",
+    "restoreDefaults": "Επαναφορά προεπιλογών",
+    "cancel": "Ακύρωση",
+    "preferences": "Προτιμήσεις",
+    "pause": "Παύση διαλειμμάτων",
+    "for2Hours": "2 ώρες",
+    "resetBreaks": "Επαναφορά διαλειμμάτων",
+    "warning": "Αυτό θα επαναφέρει τις προεπιλογές της εφαρμογής και όλες οι ρυθμίσεις σας θα χαθούν.",
+    "forHour": "1 ώρα",
+    "quitCaesura": "Έξοδος από το Caesura",
+    "continue": "Συνέχεια",
+    "downloadLatestVersion": "Κατεβάστε την τελευταία έκδοση"
+  },
+  "break": {
+    "postpone": "Αναβολή αυτού του διαλείμματος",
+    "skip": "Παράλειψη αυτού του διαλείμματος",
+    "title": "Ώρα για ένα διάλειμμα!",
+    "finish": "Ολοκληρώστε αυτό το διάλειμμα"
+  },
+  "preferences": {
+    "nav": {
+      "settings": "Ρυθμίσεις",
+      "schedule": "Πρόγραμμα",
+      "theme": "Θέμα",
+      "about": "Σχετικά"
+    },
+    "settings": {
+      "openAtLogin": "Εκκίνηση του Caesura αυτόματα κατά την είσοδο",
+      "showBreaksIn": "Εμφανίζει διαλείμματα σε:",
+      "fullscreen": "Πλήρης οθόνη",
+      "showIdeas": "Εμφάνιση συμβουλών άσκησης κατά τη διάρκεια των διαλειμμάτων",
+      "monitorDnd": "Εμφάνιση διαλειμμάτων ακόμη και σε λειτουργία Μη Ενοχλήσεως",
+      "language": "Επιλέξτε γλώσσα:",
+      "restoreDefaults": "Επαναφορά προεπιλογών",
+      "window": "Παράθυρο",
+      "allScreens": "Εμφανίζει διαλείμματα σε όλες τις οθόνες",
+      "monitorIdleTime": "Παρακολούθηση χρόνου αδράνειας του συστήματος (τα διαλείμματα παύονται αν το σύστημα είναι αδρανές)."
+    },
+    "schedule": {
+      "enableMiniBreaks": "Ενεργοποίηση Μικρών Διαλειμμάτων",
+      "breakFor": "Διάλειμμα για:",
+      "every": "Κάθε:",
+      "showNotificationBeforeMiniBreak": "Εμφάνιση ειδοποίησης πριν ξεκινήσει το Μικρό Διάλειμμα",
+      "longBreaks": "Μεγάλα Διαλείμματα:",
+      "enableLongBreaks": "Ενεργοποίηση Μακρών Διαλειμμάτων",
+      "showNotificationBeforeLongBreak": "Εμφάνιση ειδοποίησης πριν ξεκινήσει το Μακρύ Διάλειμμα",
+      "enablePostponeLong": "Ενεργοποίηση Αναβολής για Μακρύ Διάλειμμα",
+      "strictMode": "Αυστηρή λειτουργία:",
+      "enableStrictMini": "Ενεργοποίηση Aυστηρής λειτουργίας για Μικρά Διαλείμματα",
+      "enableStrictLong": "Ενεργοποίηση Αυστηρής λειτουργίας για Μικρά Διαλείμματα",
+      "cantDisableBoth": "Δεν είναι δυνατή η απενεργοποίηση και των δύο τύπων διαλειμμάτων",
+      "miniBreaks": "Μικρά διαλείμματα:",
+      "longBreaksInfo": "Τα Μακρά Διαλείμματα λαμβάνονται λιγότερο τακτικά, αλλά έχουν μεγαλύτερη διάρκεια, επιτρέποντάς σας να κάνετε ένα εκτεταμένο διάλειμμα από τη δουλειά σας.",
+      "strictModeInfo": "Η αυστηρή λειτουργία σας αποτρέπει από το να παραλείψετε είτε τα Μικρά Διαλείμματα είτε τα Μακρά Διαλείμματα και έχει σχεδιαστεί για να βοηθά στη διαχείριση της πειθαρχίας.",
+      "miniBreaksInfo": "Τα Μικρά διαλείμματα είναι σύντομα διαλείμματα που λαμβάνονται τακτικά για να σας δώσουν την ευκαιρία να τεντωθείτε και να χαλαρώσετε.",
+      "enablePostponeMini": "Ενεργοποίηση Αναβολής για Μικρό Διάλειμμα"
+    },
+    "theme": {
+      "appearance": "Εμφάνιση:",
+      "greenClouds": "Πράσινα σύννεφα",
+      "autumnBeBlessed": "Ευλογημένο το φθινόπωρο",
+      "graphiteCrystal": "Κρύσταλλο γραφίτη",
+      "windChime": "Ηχητικό ανέμου",
+      "ticToc": "Τικ-Τοκ",
+      "reverie": "Ονειροπόληση",
+      "trayIcon": "Εικονίδιο γραμμής μενού:",
+      "colour": "Χρώμα",
+      "monochrome": "Μονόχρωμο",
+      "invertedMonochrome": "Αντεστραμμένο μονόχρωμο",
+      "snowWhite": "Χιονάτη",
+      "coffeeKisses": "Φιλιά καφέ",
+      "morningSwim": "Πρωινό κολύμπι",
+      "transparentMode": "Ενεργοποίηση διαφάνειας",
+      "sounds": "Ήχοι:",
+      "enableSounds": "Ενεργοποίηση ήχων",
+      "crystalGlass": "Κρυστάλλινο γυαλί",
+      "silence": "Hσυχία"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "latestVersion": "Τελευταία έκδοση. ",
+      "version": "Έκδοση. ",
+      "checkNewVersion": "Αυτόματος έλεγχος ενημερώσεων εφαρμογής"
+    },
+    "title": "Προτιμήσεις Caesura"
+  },
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "oclock_one": "{{count}} η ώρα",
+    "oclock_other": "{{count}} η ώρα",
+    "seconds_one": "{{count}} δευτερόλεπτο",
+    "seconds_other": "{{count}} δευτερόλεπτα",
+    "hours_one": "{{count}} ώρα",
+    "hours_other": "{{count}} ώρες",
+    "inAbout": "σε περίπου {{count}}",
+    "percent_one": "{{count}} τοις εκατό",
+    "percent_other": "{{count}} τοις εκατό",
+    "remaining": "{{count}} υπολειπόμενο",
+    "minutes_one": "{{count}} λεπτό",
+    "minutes_other": "{{count}} λεπτά",
+    "elapsed": "Έχουν περάσει {{count}}"
+  },
+  "process": {
+    "newVersionAvailable": "Η νέα έκδοση είναι διαθέσιμη!"
+  },
+  "statusMessages": {
+    "paused": "Σε παύση",
+    "indefinitely": "Επ' αόριστον",
+    "appExclusion": "Κανόνας εξαίρεσης εφαρμογής",
+    "nextMiniBreak": "Επόμενο μίνι Διάλειμμα",
+    "afterMiniBreak_one": "μετά από {{count}} Μικρό Διάλειμμα",
+    "afterMiniBreak_other": "μετά από {{count}} Μικρά Διαλείμματα",
+    "dndMode": "Η Λειτουργία Μη Ενοχλήσεως είναι ενεργοποιημένη",
+    "resuming": "Συνέχιση",
+    "nextLongBreak": "Επόμενο Μακρύ Διάλειμμα"
+  }
+}

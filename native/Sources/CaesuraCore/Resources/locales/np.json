@@ -1,0 +1,124 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - ब्रेक समय रिमाइन्डर एप्लिकेशन",
+    "microbreakIn": "अर्को छोटो ब्रेक पुनः $t(utils.seconds, {'count': {{seconds}} }) मा सुरु हुन्छ । ",
+    "breakIn": "अर्को लामो ब्रेक पुनः $t(utils.seconds, {'count': {{seconds}} }) मा सुरु हुन्छ ।",
+    "resumingBreaks": "पुनः ब्रेक सुरु गर्दै ।",
+    "downloadLatestVersion": "नयाँ संस्करण डाउनलोड गर्नुहोस् ।",
+    "toBreak": "लामो ब्रेक ।",
+    "toMicrobreak": "छोटो ब्रेक ।",
+    "skipToTheNext": "अर्को ब्रेकमा जानुहोस् ।",
+    "resume": "पुनःसुरु गर्नुहोस् ।",
+    "pause": "ब्रेक रोक्नुहोस् |",
+    "forHour": "एक घण्टा को लागी ।",
+    "for2Hours": "दुई घण्टा को लागी ।",
+    "for5Hours": "पाँच घण्टाको लागी ।",
+    "untilMorning": "बिहान सम्म ।",
+    "indefinitely": "अनिश्चित अवधिको लागि ।",
+    "resetBreaks": "ब्रेकहरू रिसेट गर्नुहोस् ।",
+    "quitCaesura": "caesura बन्द गर्नुहोस् ।",
+    "restoreDefaults": "फेरी पहिलाकै अवस्था मा लैजाऊ ।",
+    "warning": "यसले एप्लिकेशनको सेटिंग्सलाई पहिलाकै अवस्थामा रूपान्तरण गर्दछ र तपाईंको सबै सेटिंग्स हराउनेछ ।",
+    "continue": "जारी राख्नुहोस् ।",
+    "cancel": "रद्द गर्नुहोस् ।",
+    "preferences": "सेटिंग्स"
+  },
+  "break": {
+    "postpone": "यस ब्रेकलाई स्थगित गर्नुहोस् ।",
+    "skip": "यो ब्रेक छोड्नुहोस् ।",
+    "title": "ब्रेक लिन समय भयो ।"
+  },
+  "preferences": {
+    "title": "Caesura प्राथमिकताहरू",
+    "nav": {
+      "settings": "सेटिंग्स",
+      "schedule": "तालिका",
+      "theme": "थिम",
+      "about": "बारेमा"
+    },
+    "settings": {
+      "openAtLogin": "लग ईन गर्ने बखत स्वचालित रूपमा Caesura शुरू गर्नुहोस् ।",
+      "showBreaksIn": "ब्रेक कसरी प्रस्तुत गर्ने:",
+      "window": "विन्डो",
+      "fullscreen": "फूल स्क्रीन",
+      "showIdeas": "ब्रेकको बखत व्यायाम सल्लाहहरू देखाउनुहोस् ।",
+      "allScreens": "सबै मोनिटरहरूमा ब्रेकहरू देखाउँदछ",
+      "monitorIdleTime": "प्रणाली निष्क्रिय समय मोनिटर गर्नुहोस् (ब्रेकहरू रोकिन्छ यदि प्रणाली निष्क्रिय छ भने) ।",
+      "monitorDnd": "डु नट डिस्टर्ब मोडमा पनि ब्रेकहरू देखाउनुहोस् ।",
+      "language": "भाषा छनोट गर्नुस:",
+      "restoreDefaults": "पहिलाकै अवस्थामा रूपान्तरण गर्नुहोस् ।"
+    },
+    "schedule": {
+      "miniBreaks": "छोटो ब्रेक ।",
+      "miniBreaksInfo": "मिनी ब्रेकहरू छोटो ब्रेकहरू हुन् जुन तपाईंलाई आराम गर्न को लागी एक मौका नियमित रूपमा दिन्छ ।",
+      "enableMiniBreaks": "मिनी ब्रेकहरू सक्षम गर्नुहोस् ।",
+      "breakFor": "ब्रेक फोर्:",
+      "every": "प्रत्येक:",
+      "showNotificationBeforeMiniBreak": "मिनी ब्रेक सुरु हुनुभन्दा पहिले सूचना देखाउनुहोस् ।",
+      "enablePostponeMini": "मिनी ब्रेकको लागि स्थगित सक्षम गर्नुहोस् ।",
+      "longBreaks": "लामो ब्रेक:",
+      "longBreaksInfo": "लामो ब्रेकहरू कम नियमित रूपमा लीइन्छ, तर अधिक अवधिको हुन्छ जस्ले तपाईंलाई तपाईंको कामबाट विस्तारित ब्रेक लिन अनुमति दिन्छ ।",
+      "enableLongBreaks": "लामो ब्रेक सक्षम गर्नुहोस् ।",
+      "showNotificationBeforeLongBreak": "ब्रेक सुरु हुनुभन्दा पहिले सूचना देखाउनुहोस् ।",
+      "enablePostponeLong": "लामो ब्रेकको लागि स्थगित सक्षम गर्नुहोस् ।",
+      "strictMode": "सख्त मोड:",
+      "strictModeInfo": "सख्त मोडले तपाइँ कि त छोटो ब्रेक वा लामो ब्रेक छोड्नबाट रोक्छ र अनुशासनमा मद्दतको लागि डिजाइन गरिएको हो छ ।",
+      "enableStrictMini": "मिनी ब्रेकको लागि सख्त मोड सक्षम गर्नुहोस् ।",
+      "enableStrictLong": "लामो ब्रेकको लागि सख्त मोड सक्षम गर्नुहोस् ।",
+      "cantDisableBoth": "दुवै प्रकारका ब्रेकहरू असक्षम गर्न सम्भव छैन ।"
+    },
+    "theme": {
+      "appearance": "देखापर्ने:",
+      "greenClouds": "हरियो बादल",
+      "autumnBeBlessed": "शरद मौसम",
+      "graphiteCrystal": "ग्रेफाइट क्रिस्टल",
+      "coffeeKisses": "कफी चुम्बन",
+      "morningSwim": "बिहानको पौडी खेलाई",
+      "transparentMode": "पारदर्शिता सक्षम गर्नुहोस्",
+      "sounds": "ध्वनि:",
+      "enableSounds": "ध्वनी सक्षम गर्नुहोस्",
+      "crystalGlass": "क्रिस्टल गिलास",
+      "windChime": "हावाको झंकार",
+      "ticToc": "टिक टक",
+      "trayIcon": "मेनूबार आइकन:",
+      "colour": "रंग",
+      "monochrome": "मोनोक्रोम",
+      "invertedMonochrome": "इन्भर्ट गरिएको मोनोक्रोम"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "version": "संस्करण ",
+      "latestVersion": "पछिल्लो संस्करण ",
+      "notifyNewVersion": "एप्लिकेशन अपडेटहरू स्वचालित रूपमा सूचित गर्नुहोस् ।"
+    }
+  },
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "{{count}} प्रतिशत",
+    "percent_other": "{{count}} प्रतिशत",
+    "oclock_one": "{{count}} बजे",
+    "oclock_other": "{{count}} बजे",
+    "seconds_one": "{{count}} सेकेन्ड",
+    "seconds_other": "{{count}} seconds",
+    "minutes_one": "{{count}} मिनेट",
+    "minutes_other": "{{count}} minutes",
+    "hours_one": "{{count}} घण्टा",
+    "hours_other": "{{count}} hours",
+    "remaining": "{{count}} बाँकी",
+    "inAbout": "{{count}} पछि सुचारु गरिदै ।"
+  },
+  "process": {
+    "newVersionAvailable": "नयाँ संस्करण उपलब्ध छ!"
+  },
+  "statusMessages": {
+    "paused": "रोकिएको छ ",
+    "indefinitely": "अनिश्चित अवधिको लागि ।",
+    "dndMode": "डु नट डिस्टुर्ब इज ओन ।",
+    "nextLongBreak": "अर्को लामो ब्रेक",
+    "nextMiniBreak": "अर्को छोटो ब्रेक",
+    "afterMiniBreak_one": " {{count}} वटा छोटो ब्रेक पछि",
+    "afterMiniBreak_other": " {{count}} वटा लामो ब्रेक पछि",
+    "resuming": "पुनःसुरु गर्दै ।"
+  }
+}

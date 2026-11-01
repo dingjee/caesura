@@ -1,0 +1,131 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura – Die Pausen-Erinnerungs-App",
+    "microbreakIn": "Mini-Pause in $t(utils.seconds, {'count': {{seconds}} })",
+    "breakIn": "Lange Pause in $t(utils.seconds, {'count': {{seconds}} })",
+    "resumingBreaks": "Pausen fortsetzen",
+    "downloadLatestVersion": "Neueste Version herunterladen",
+    "toBreak": "Lange Pause",
+    "toMicrobreak": "Mini-Pause",
+    "skipToTheNext": "Springe zur nächsten",
+    "resume": "Pausen fortsetzen",
+    "pause": "Pausen anhalten",
+    "forHour": "1 Stunde",
+    "for2Hours": "2 Stunden",
+    "for5Hours": "5 Stunden",
+    "untilMorning": "Bis zum Morgen",
+    "indefinitely": "Unbegrenzt",
+    "resetBreaks": "Pausen zurücksetzen",
+    "quitCaesura": "Caesura beenden",
+    "restoreDefaults": "Standardeinstellungen wiederherstellen",
+    "warning": "Dadurch werden die Anwendungsstandardeinstellungen wiederhergestellt und alle deine Einstellungen gehen verloren.",
+    "continue": "Fortsetzen",
+    "cancel": "Abbrechen",
+    "preferences": "Einstellungen"
+  },
+  "break": {
+    "postpone": "Diese Pause aufschieben",
+    "skip": "Diese Pause überspringen",
+    "title": "Zeit für eine Pause!",
+    "finish": "Beende diese Pause"
+  },
+  "preferences": {
+    "title": "Caesura-Einstellungen",
+    "nav": {
+      "settings": "Einstellungen",
+      "schedule": "Zeitplanung",
+      "theme": "Aussehen",
+      "about": "Über"
+    },
+    "settings": {
+      "openAtLogin": "Caesura automatisch bei der Anmeldung starten",
+      "showBreaksIn": "Pausen anzeigen in:",
+      "window": "Fenster",
+      "fullscreen": "Vollbild",
+      "showIdeas": "Bewegungstipps in den Pausen anzeigen",
+      "allScreens": "Pausen auf allen Monitoren anzeigen",
+      "monitorIdleTime": "Abwesenheit vom Gerät berücksichtigen (Zeit, wenn das System inaktiv ist, wird nicht mitgezählt).",
+      "monitorDnd": "Pausen auch im Modus \"Nicht stören\" anzeigen",
+      "language": "Sprache auswählen:",
+      "restoreDefaults": "Standardeinstellungen wiederherstellen"
+    },
+    "schedule": {
+      "miniBreaks": "Mini-Pausen:",
+      "miniBreaksInfo": "Mini-Pausen sind kurze Pausen, die regelmäßig eingelegt werden, damit du dich strecken und entspannen kannst.",
+      "enableMiniBreaks": "Mini-Pausen aktivieren",
+      "breakFor": "Pause für:",
+      "every": "Alle:",
+      "showNotificationBeforeMiniBreak": "Benachrichtigung anzeigen, bevor Mini-Pause startet",
+      "enablePostponeMini": "Aufschub bei Mini-Pause aktivieren",
+      "longBreaks": "Lange Pausen:",
+      "longBreaksInfo": "Lange Pausen werden seltener eingelegt, dauern jedoch länger, sodass du eine längere Pause von deiner Arbeit einlegen kannst.",
+      "enableLongBreaks": "Lange Pausen aktivieren",
+      "showNotificationBeforeLongBreak": "Benachrichtigung anzeigen, bevor lange Pause startet",
+      "enablePostponeLong": "Aufschub bei langer Pause aktivieren",
+      "strictMode": "Strikter Modus:",
+      "strictModeInfo": "Der strikte Modus verhindert, dass du Mini-Pausen oder lange Pausen überspringst, und soll deine Disziplin unterstützen.",
+      "enableStrictMini": "Strikten Modus für Mini-Pausen aktivieren",
+      "enableStrictLong": "Strikten Modus für lange Pausen aktivieren",
+      "cantDisableBoth": "Es ist nicht möglich, beide Pausenarten zu deaktivieren"
+    },
+    "theme": {
+      "appearance": "Aussehen:",
+      "greenClouds": "Grüne Wolken",
+      "autumnBeBlessed": "Gesegneter Herbst",
+      "graphiteCrystal": "Graphit-Kristall",
+      "coffeeKisses": "Kaffeeküsse",
+      "morningSwim": "Morgenschwimmen",
+      "transparentMode": "Transparenz aktivieren",
+      "sounds": "Ton:",
+      "enableSounds": "Töne einschalten",
+      "crystalGlass": "Kristallglas",
+      "windChime": "Windspiel",
+      "ticToc": "Tick-Tack",
+      "trayIcon": "Taskleisten-Symbol:",
+      "colour": "Farbig",
+      "monochrome": "Einfarbig",
+      "invertedMonochrome": "Einfarbig invertiert",
+      "snowWhite": "Schneeweiß",
+      "reverie": "Tagträumerei",
+      "silence": "Stille"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "version": "Version ",
+      "latestVersion": "Neueste Version ",
+      "notifyNewVersion": "Automatisch über Anwendungsaktualisierungen benachrichtigen",
+      "checkNewVersion": "Automatisch nach App-Updates suchen"
+    }
+  },
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "{{count}} Prozent",
+    "percent_other": "{{count}} Prozent",
+    "oclock_one": "{{count}} Uhr",
+    "oclock_other": "{{count}} Uhr",
+    "seconds_one": "{{count}} Sekunde",
+    "seconds_other": "{{count}} Sekunden",
+    "minutes_one": "{{count}} Minute",
+    "minutes_other": "{{count}} Minuten",
+    "hours_one": "{{count}} Stunde",
+    "hours_other": "{{count}} Stunden",
+    "remaining": "{{count}} verbleibend",
+    "inAbout": "in etwa {{count}}",
+    "elapsed": "{{count}} vergangen"
+  },
+  "process": {
+    "newVersionAvailable": "Neue Version ist verfügbar!"
+  },
+  "statusMessages": {
+    "paused": "Pausiert",
+    "indefinitely": "Unbegrenzt",
+    "dndMode": "\"Bitte nicht stören\" ist eingeschaltet",
+    "nextLongBreak": "Nächste lange Pause",
+    "nextMiniBreak": "Nächste Mini-Pause",
+    "afterMiniBreak_one": "nach {{count}} Mini-Pause",
+    "afterMiniBreak_other": "nach {{count}} Mini-Pausen",
+    "resuming": "Fortsetzen",
+    "appExclusion": "App-Ausnahmeregel"
+  }
+}

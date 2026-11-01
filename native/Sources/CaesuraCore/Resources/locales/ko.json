@@ -1,0 +1,120 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - 휴식 시간 알림 앱",
+    "microbreakIn": "짧은 휴식까지 $t(utils.seconds, {'count': {{seconds}} }) 남음",
+    "breakIn": "긴 휴식까지 $t(utils.seconds, {'count': {{seconds}} }) 남음",
+    "resumingBreaks": "휴식 재개",
+    "downloadLatestVersion": "최신 버전 다운로드",
+    "toBreak": "긴 휴식",
+    "toMicrobreak": "짧은 휴식",
+    "skipToTheNext": "다음으로 건너뛰기",
+    "resume": "휴식 재개",
+    "pause": "일시 중지",
+    "forHour": "1시간",
+    "for2Hours": "2시간",
+    "for5Hours": "5시간",
+    "untilMorning": "아침까지",
+    "indefinitely": "무기한",
+    "resetBreaks": "휴식 재설정",
+    "quitCaesura": "Caesura 종료",
+    "restoreDefaults": "기본값 복원",
+    "warning": "앱 기본값이 복원되며, 모든 설정이 초기화됩니다.",
+    "continue": "계속",
+    "cancel": "취소",
+    "preferences": "환경설정"
+  },
+  "break": {
+    "postpone": "이 휴식 연기",
+    "skip": "이 휴식 건너뛰기",
+    "title": "휴식을 취할 시간입니다!"
+  },
+  "preferences": {
+    "title": "Caesura 환경설정",
+    "nav": {
+      "settings": "설정",
+      "schedule": "일정",
+      "theme": "테마",
+      "about": "정보"
+    },
+    "settings": {
+      "openAtLogin": "로그인 시 Caesura 자동 시작",
+      "showBreaksIn": "휴식 표시 방법:",
+      "window": "창",
+      "fullscreen": "전체 화면",
+      "showIdeas": "휴식 중 운동 팁 표시",
+      "allScreens": "모든 모니터에 휴식 표시",
+      "monitorIdleTime": "시스템 유휴 시간 모니터링 (시스템이 유휴 상태일 경우 휴식 일시 중지).",
+      "monitorDnd": "방해금지 모드에서도 휴식 표시",
+      "language": "언어 선택:",
+      "restoreDefaults": "기본값 복원"
+    },
+    "schedule": {
+      "miniBreaks": "짧은 휴식:",
+      "miniBreaksInfo": "짧은 휴식은 정기적으로 짧은 휴식을 취하여 몸을 스트레칭하고 긴장을 푸는 시간입니다.",
+      "enableMiniBreaks": "짧은 휴식 활성화",
+      "breakFor": "휴식 시간:",
+      "every": "간격:",
+      "showNotificationBeforeMiniBreak": "짧은 휴식 시작 전 알림 표시",
+      "enablePostponeMini": "짧은 휴식 연기 활성화",
+      "longBreaks": "긴 휴식:",
+      "longBreaksInfo": "긴 휴식은 짧은 휴식보다 덜 규칙적이지만, 더 긴 시간 동안 업무에서 벗어나 충분히 쉴 수 있도록 합니다.",
+      "enableLongBreaks": "긴 휴식 활성화",
+      "showNotificationBeforeLongBreak": "긴 휴식 시작 전 알림 표시",
+      "enablePostponeLong": "긴 휴식 연기 활성화",
+      "strictMode": "엄격 모드:",
+      "strictModeInfo": "엄격 모드는 짧은 휴식이나 긴 휴식을 건너뛸 수 없게 하여, 규칙적인 휴식 습관을 들이는 데 도움이 됩니다.",
+      "enableStrictMini": "짧은 휴식 엄격 모드 활성화",
+      "enableStrictLong": "긴 휴식 엄격 모드 활성화",
+      "cantDisableBoth": "두 가지 유형의 휴식을 모두 비활성화할 수 없습니다."
+    },
+    "theme": {
+      "appearance": "외형:",
+      "greenClouds": "녹색 구름",
+      "autumnBeBlessed": "축복받은 가을",
+      "graphiteCrystal": "그래파이트 크리스탈",
+      "coffeeKisses": "커피 키스",
+      "morningSwim": "아침 수영",
+      "transparentMode": "투명 모드 활성화",
+      "sounds": "소리:",
+      "enableSounds": "소리 활성화",
+      "crystalGlass": "크리스탈 유리",
+      "windChime": "풍경",
+      "ticToc": "틱톡",
+      "reverie": "몽상",
+      "trayIcon": "메뉴바 아이콘:",
+      "colour": "색상",
+      "monochrome": "흑백",
+      "invertedMonochrome": "반전 흑백",
+      "snowWhite": "눈처럼 흰색"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "version": "버전 ",
+      "latestVersion": "최신 버전 ",
+      "checkNewVersion": "앱 업데이트 자동 확인"
+    }
+  },
+  "utils": {
+    "remaining": "{{count}} 남음",
+    "inAbout": "약 {{count}} 후",
+    "none_other": "{{count}}",
+    "percent_other": "{{count}} 퍼센트",
+    "oclock_other": "{{count}} 시",
+    "seconds_other": "{{count}}초",
+    "minutes_other": "{{count}}분",
+    "hours_other": "{{count}}시간"
+  },
+  "process": {
+    "newVersionAvailable": "새 버전이 나왔습니다!"
+  },
+  "statusMessages": {
+    "paused": "일시 중지됨",
+    "indefinitely": "무기한",
+    "dndMode": "방해금지 모드 켜짐",
+    "appExclusion": "앱 제외 규칙",
+    "nextLongBreak": "다음 긴 휴식",
+    "nextMiniBreak": "다음 짧은 휴식",
+    "afterMiniBreak_other": "짧은 휴식 {{count}}회 후",
+    "resuming": "재개 중"
+  }
+}

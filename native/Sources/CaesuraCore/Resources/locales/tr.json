@@ -1,0 +1,127 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - Mola hatırlatıcı uygulama",
+    "resumingBreaks": "Molalara devam ediliyor",
+    "downloadLatestVersion": "Son sürümü indir",
+    "skipToTheNext": "Bir sonrakine geç",
+    "resume": "Devam et",
+    "pause": "Durdur",
+    "forHour": "Bir saatliğine",
+    "for2Hours": "Iki saatliğine",
+    "for5Hours": "5 saatliğine",
+    "untilMorning": "Sabaha kadar",
+    "indefinitely": "Sonsuza kadar",
+    "resetBreaks": "Molaları sıfırla",
+    "quitCaesura": "Caesura'den çık",
+    "preferences": "Tercihler",
+    "cancel": "İptal",
+    "continue": "Devam",
+    "warning": "Varsayılanlara dönülecek ve tüm ayarlarınız kaybolacak.",
+    "restoreDefaults": "Varsayılanlara dön",
+    "toMicrobreak": "Kısa Mola",
+    "toBreak": "Uzun Mola",
+    "breakIn": "$t(utils.seconds, {'count': {{seconds}} }) sonra uzun mola",
+    "microbreakIn": "$t(utils.seconds, {'count': {{seconds}} }) sonra kısa mola"
+  },
+  "break": {
+    "title": "Mola zamanı!",
+    "skip": "Bu molayı geç",
+    "postpone": "Bu molayı ertele"
+  },
+  "preferences": {
+    "theme": {
+      "greenClouds": "Yeşil bulutlar",
+      "autumnBeBlessed": "Sonbahar",
+      "graphiteCrystal": "Grafit kristal",
+      "coffeeKisses": "Kahve öpücüğü",
+      "morningSwim": "Sabah yüzmesi",
+      "crystalGlass": "Kristal cam",
+      "windChime": "Rüzgar uğultusu",
+      "ticToc": "Tik tak",
+      "snowWhite": "Kar beyazı",
+      "invertedMonochrome": "Renkleri ters çevrilmiş siyah beyaz",
+      "monochrome": "Siyah beyaz",
+      "colour": "Renk",
+      "trayIcon": "Menü çubuğu ikonu:",
+      "enableSounds": "Sesleri etkinleştir",
+      "sounds": "Sesler:",
+      "transparentMode": "Saydamlığı ayarla",
+      "appearance": "Görünüm:",
+      "reverie": "Hayal"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "checkNewVersion": "Uygulama güncellemelerini otomatik olarak kontrol et",
+      "version": "Sürüm ",
+      "latestVersion": "Son sürüm "
+    },
+    "settings": {
+      "allScreens": "Molaları tüm monitörlerde göster",
+      "showIdeas": "Molalarda egzersiz ipuçları göster",
+      "fullscreen": "Tam Ekran",
+      "window": "Pencere",
+      "showBreaksIn": "Molaları Gör:",
+      "openAtLogin": "Giriş yapıldığında Caesura'i otomatik başlat",
+      "language": "Dili seç:",
+      "restoreDefaults": "Varsayılanı geri yükle",
+      "monitorDnd": "Rahatsız Etme modundayken de molaları göster",
+      "monitorIdleTime": "Sistemin boşta olduğu zamanı gözlemle (sistem boşta iken molalar durdurulur)."
+    },
+    "nav": {
+      "about": "Hakkında",
+      "theme": "Tema",
+      "schedule": "Zamanla",
+      "settings": "Ayarlar"
+    },
+    "title": "Caesura Ayarları",
+    "schedule": {
+      "miniBreaksInfo": "Mini Molalar, esneme ve rahatlama şansı vermek için düzenli olarak yapılan kısa molalardır.",
+      "enableMiniBreaks": "Mini Molaları Etkinleştir",
+      "miniBreaks": "Küçük Molalar:",
+      "enableLongBreaks": "Uzun molaları etkinleştir",
+      "longBreaks": "Uzun Molalar:",
+      "every": "Her:",
+      "breakFor": "Mola süresi:",
+      "strictMode": "Sınırlı Mod:",
+      "enablePostponeLong": "Uzun Mola için ertelemeyi etkinleştir",
+      "showNotificationBeforeLongBreak": "Uzun Mola başlamadan bildirim göster",
+      "enablePostponeMini": "Kısa Mola için ertelemeyi etkinleştir",
+      "showNotificationBeforeMiniBreak": "Kısa Moladan önce bildirim göster",
+      "strictModeInfo": "Sıkı Mod, Kısa Molaları veya Uzun Molaları geçiştirmenizi önler ve disiplinli olmanız için tasarlanmıştır.",
+      "cantDisableBoth": "İki çeşit molayı da etkisiz hale getirmek mümkün değil",
+      "enableStrictLong": "Uzun Molalar için Sıkı Mod'u Etkinleştir",
+      "enableStrictMini": "Kısa Molalar için Sıkı Mod'u Etkinleştir",
+      "longBreaksInfo": "Uzun Molalar, çalışmanızdan daha uzun süre mola vermenizi sağlayan ve daha uzun aralıklarla daha uzun süren molalardır."
+    }
+  },
+  "process": {
+    "newVersionAvailable": "Yeni sürüm çıktı!"
+  },
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "yüzde {{count}}",
+    "percent_other": "yüzde {{count}}",
+    "oclock_one": "saat {{count}}",
+    "oclock_other": "saat {{count}}",
+    "seconds_one": "{{count}} saniye",
+    "seconds_other": "{{count}} saniye",
+    "minutes_one": "{{count}} dakika",
+    "minutes_other": "{{count}} dakika",
+    "hours_one": "{{count}} saat",
+    "hours_other": "{{count}} saat",
+    "remaining": "{{count}} kaldı",
+    "inAbout": "{{count}} içerisinde"
+  },
+  "statusMessages": {
+    "paused": "Durduruldu",
+    "indefinitely": "Süresiz",
+    "dndMode": "Rahatsız Etme etkin",
+    "appExclusion": "Uygulama istisna kuralı",
+    "nextLongBreak": "Sonraki Uzun Mola",
+    "nextMiniBreak": "Sonraki Kısa Mola",
+    "afterMiniBreak_one": "{{count}}'dan sonra kısa mola ver",
+    "afterMiniBreak_other": "{{count}}'dan sonra kısa molalar ver",
+    "resuming": "Devam ediyor"
+  }
+}

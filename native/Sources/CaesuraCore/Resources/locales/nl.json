@@ -1,0 +1,128 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - Pauze herinnering app",
+    "microbreakIn": "Mini pauze in $t(utils.seconds, {'count': {{seconds}} })",
+    "breakIn": "Lange pauze in $t(utils.seconds, {'count': {{seconds}} })",
+    "resumingBreaks": "Pauzes hervatten",
+    "downloadLatestVersion": "Download de laatste versie",
+    "toBreak": "Lange pauze",
+    "toMicrobreak": "Mini pauze",
+    "skipToTheNext": "Ga naar de volgende",
+    "resume": "Hervat",
+    "pause": "Pauze",
+    "forHour": "voor een uur",
+    "for2Hours": "voor 2 uur",
+    "for5Hours": "voor 5 uur",
+    "untilMorning": "voor morgen",
+    "indefinitely": "voor onbepaalde tijd",
+    "resetBreaks": "Reset pauzes",
+    "quitCaesura": "Stop Caesura",
+    "warning": "Dit zal de standaardinstellingen herstellen en al je wijzigingen gaan verloren.",
+    "continue": "Doorgaan",
+    "cancel": "Annuleer",
+    "preferences": "Instellingen",
+    "restoreDefaults": "Standaard instellingen herstellen"
+  },
+  "break": {
+    "postpone": "Deze pauze uitstellen",
+    "skip": "Deze pauze overslaan",
+    "title": "Tijd voor een pauze!"
+  },
+  "preferences": {
+    "title": "Caesura Instellingen",
+    "nav": {
+      "settings": "Instellingen",
+      "schedule": "Schema",
+      "theme": "Thema",
+      "about": "Over"
+    },
+    "settings": {
+      "openAtLogin": "Start Caesura automatisch tijdens het inloggen",
+      "showBreaksIn": "Toon pauzes in:",
+      "window": "Venster",
+      "fullscreen": "Volledig Scherm",
+      "showIdeas": "Toon tips voor oefeningen tijdens de pauzes",
+      "allScreens": "Toon pauzes op alle monitoren",
+      "monitorIdleTime": "Controleer inactieve tijd van het systeem (aftellen wordt gepauzeerd als het systeem inactief is).",
+      "monitorDnd": "Toon pauzes in Niet Storen modus",
+      "language": "Selecteer taal:",
+      "restoreDefaults": "Standaardinstellingen herstellen"
+    },
+    "schedule": {
+      "miniBreaks": "Mini pauzes:",
+      "miniBreaksInfo": "Mini pauzes zijn korte pauzes die regelmatig genomen worden om je de kans te geven om uit te rekken en te ontspannen.",
+      "breakFor": "Pauze voor:",
+      "every": "Elke:",
+      "showNotificationBeforeMiniBreak": "Toon notificatie voordat een Mini pauze begint",
+      "enablePostponeMini": "Uitstellen van Mini pauzes inschakelen",
+      "longBreaks": "Lange pauzes:",
+      "longBreaksInfo": "Lange pauzes worden minder regelmatig genomen, maar zijn van een langere duratie, waardoor je de mogelijkheid hebt om een verlende pauze van je werk te nemen.",
+      "enableLongBreaks": "Lange pauzes inschakelen",
+      "showNotificationBeforeLongBreak": "Toon notificatie voordat een Lange pauze begint",
+      "enablePostponeLong": "Uitstellen van Lange pauzes inschakelen",
+      "strictMode": "Strenge modus:",
+      "strictModeInfo": "Strenge modus voorkomt dat je de Mini pauzes en Lange pauzes kunt overslaan en is ontworpen om te helpen met discipline.",
+      "enableStrictMini": "Strenge Modus inschakelen voor Mini pauzes",
+      "enableStrictLong": "Strenge Modus inschakelen voor Lange pauzes",
+      "cantDisableBoth": "Het is niet mogelijk om allebei de pauze soorten uit te schakelen",
+      "enableMiniBreaks": "Mini pauzes inschakelen"
+    },
+    "theme": {
+      "appearance": "Uiterlijk:",
+      "greenClouds": "Groene wolken",
+      "autumnBeBlessed": "Gezegende herfst",
+      "graphiteCrystal": "Grafietkristal",
+      "coffeeKisses": "Koffiezoenen",
+      "morningSwim": "Zwemmen in de ochtend",
+      "sounds": "Geluiden:",
+      "enableSounds": "Geluiden inschakelen",
+      "crystalGlass": "Kristalglas",
+      "windChime": "Windgong",
+      "ticToc": "Tik tok",
+      "trayIcon": "Menubalk icoon:",
+      "colour": "Kleur",
+      "monochrome": "Monochroom",
+      "invertedMonochrome": "Omgekeerd Monochroom",
+      "snowWhite": "Sneeuwwit",
+      "transparentMode": "Transparantie inschakelen",
+      "reverie": "Dagdromerij"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "version": "Versie ",
+      "latestVersion": "Laatste versie ",
+      "notifyNewVersion": "Automatisch informeren wanneer er een app update beschikbaar is",
+      "checkNewVersion": "Controleer automatisch voor updates"
+    }
+  },
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "{{count}} procent",
+    "percent_other": "{{count}} procent",
+    "oclock_one": "{{count}} uur",
+    "oclock_other": "{{count}} uur",
+    "seconds_one": "{{count}} seconde",
+    "seconds_other": "{{count}} seconden",
+    "minutes_one": "{{count}} minuut",
+    "minutes_other": "{{count}} minuten",
+    "hours_one": "{{count}} uur",
+    "hours_other": "{{count}} uren",
+    "remaining": "{{count}} te gaan",
+    "inAbout": "in ongeveer {{count}}"
+  },
+  "process": {
+    "newVersionAvailable": "Nieuwe versie beschikbaar!"
+  },
+  "statusMessages": {
+    "paused": "Gepauzeerd",
+    "indefinitely": "Voor onbepaalde tijd",
+    "dndMode": "Niet Storen is ingeschakeld",
+    "nextLongBreak": "Volgende Lange Pauze",
+    "nextMiniBreak": "Volgende Mini Pauze",
+    "afterMiniBreak_one": "na {{count}} Mini Pauze",
+    "afterMiniBreak_other": "na {{count}} Mini Pauzes",
+    "resuming": "Hervatten",
+    "appExclusion": "Regel voor uitgesloten programma's"
+  }
+}

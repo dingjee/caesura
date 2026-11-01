@@ -1,0 +1,126 @@
+{
+  "main": {
+    "toolTipHeader": "Caesura - Taukomuistutussovellus",
+    "microbreakIn": "Minitauko $t(utils.seconds, {'count': {{seconds}} }) kuluttua",
+    "breakIn": "Pitkä tauko $t(utils.seconds, {'count': {{seconds}} }) kuluttua",
+    "resumingBreaks": "Jatketaan taukoja",
+    "downloadLatestVersion": "Lataa uusin versio",
+    "toBreak": "Pitkä tauko",
+    "toMicrobreak": "Minitauko",
+    "skipToTheNext": "Siirry seuraavaan",
+    "resume": "Jatka taukoja",
+    "pause": "Pysäytä tauot",
+    "forHour": "1 tunniksi",
+    "for2Hours": "2 tunniksi",
+    "for5Hours": "5 tunniksi",
+    "untilMorning": "Aamuun saakka",
+    "indefinitely": "Toistaiseksi",
+    "resetBreaks": "Nollaa tauot",
+    "quitCaesura": "Lopeta Caesura",
+    "restoreDefaults": "Palauta oletusasetukset",
+    "warning": "Tämä palauttaa sovelluksen oletusasetukset ja tekemäsi muutokset menetetään.",
+    "continue": "Jatka",
+    "cancel": "Peruuta",
+    "preferences": "Asetukset"
+  },
+  "break": {
+    "postpone": "Lykkää tätä taukoa",
+    "skip": "Jätä tämä tauko välistä",
+    "title": "Aika pitää tauko!"
+  },
+  "preferences": {
+    "title": "Caesura asetukset",
+    "nav": {
+      "settings": "Asetukset",
+      "schedule": "Aikataulu",
+      "theme": "Teema",
+      "about": "Caesurastä"
+    },
+    "settings": {
+      "openAtLogin": "Käynnistä Caesura automaattisesti sisäänkirjautumisen yhteydessä.",
+      "showBreaksIn": "Näytä tauot:",
+      "window": "Ikkunassa",
+      "fullscreen": "Koko näytöllä",
+      "showIdeas": "Näytä taukojen aikana liikuntavinkkejä.",
+      "allScreens": "Näytä tauot kaikilla näytöillä.",
+      "monitorIdleTime": "Seuraa järjestelmän käyttöä (tauot pysäytetään, jos järjestelmää ei käytetä).",
+      "monitorDnd": "Näytä tauot myös Älä häiritse tilassa",
+      "language": "Valitse kieli:",
+      "restoreDefaults": "Palauta oletusasetukset"
+    },
+    "schedule": {
+      "miniBreaks": "Minitauot:",
+      "miniBreaksInfo": "Minitauot ovat säännöllisiä lyhyitä taukoja, jotka antavat sinulle mahdollisuuden venytellä ja rentoutua.",
+      "enableMiniBreaks": "Käytä minitaukoja",
+      "breakFor": "Pidä taukoa:",
+      "every": "Joka:",
+      "showNotificationBeforeMiniBreak": "Näytä ilmoitus ennen kuin minitauko alkaa.",
+      "enablePostponeMini": "Ota minitaukojen lykkäys käyttöön.",
+      "longBreaks": "Pitkät tauot:",
+      "longBreaksInfo": "Pitkiä taukoja on harvemmin, mutta niiden kesto on pidempi, joten ne mahdollistavat pidemmän tauon työskentelystä.",
+      "enableLongBreaks": "Käytä pitkiä taukoja",
+      "showNotificationBeforeLongBreak": "Näytä ilmoitus ennen kuin pitkä tauko alkaa.",
+      "enablePostponeLong": "Ota pitkien taukojen lykkäys käyttöön.",
+      "strictMode": "Joustamaton tila:",
+      "strictModeInfo": "Joustamaton tila estää sinua lykkäämästä minitaukoja tai pitkiä taukoja ja on suunniteltu auttamaan itsekurin kanssa.",
+      "enableStrictMini": "Käytä joustamatonta tilaa minitaukojen kanssa.",
+      "enableStrictLong": "Käytä joustamatonta tilaa pitkien taukojen kanssa.",
+      "cantDisableBoth": "Molempia taukotyyppejä ei voi poistaa käytöstä samanaikaisesti."
+    },
+    "theme": {
+      "appearance": "Ulkoasu:",
+      "greenClouds": "Vihreät pilvet",
+      "autumnBeBlessed": "Siunattu syksy",
+      "graphiteCrystal": "Grafiittikristalli",
+      "coffeeKisses": "Kahvisuudelmat",
+      "morningSwim": "Aamu-uinti",
+      "transparentMode": "Käytä läpikuultavuustilaa",
+      "sounds": "Äänet:",
+      "enableSounds": "Käytä ääniä",
+      "crystalGlass": "Kristallilasi",
+      "windChime": "Tuulikello",
+      "ticToc": "Tik Tak",
+      "trayIcon": "Valikon kuvake:",
+      "colour": "Värillinen",
+      "monochrome": "Mustavalkoinen",
+      "invertedMonochrome": "Käänteinen mustavalkoinen",
+      "snowWhite": "Lumenvalkoinen"
+    },
+    "about": {
+      "tagline": "A pause for poetry.",
+      "version": "Versio ",
+      "latestVersion": "Viimeisin versio ",
+      "notifyNewVersion": "Ilmoita päivityksistä automaattisesti",
+      "checkNewVersion": "Tarkista päivitykset automaattisesti"
+    }
+  },
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "{{count}} prosentti",
+    "percent_other": "{{count}} prosenttia",
+    "oclock_one": "Kello {{count}}",
+    "oclock_other": "Kello {{count}}",
+    "seconds_one": "{{count}} sekunti",
+    "seconds_other": "{{count}} sekuntia",
+    "minutes_one": "{{count}} minuutti",
+    "minutes_other": "{{count}} minuuttia",
+    "hours_one": "{{count}} tunti",
+    "hours_other": "{{count}} tuntia",
+    "remaining": "{{count}} jäljellä",
+    "inAbout": "noin {{count}} kuluttua"
+  },
+  "process": {
+    "newVersionAvailable": "Uusi verio on saatavilla!"
+  },
+  "statusMessages": {
+    "paused": "Pysäytetty",
+    "indefinitely": "Toistaiseksi",
+    "dndMode": "Älä häiritse tila päällä",
+    "nextLongBreak": "Seuraava pitkä tauko",
+    "nextMiniBreak": "Seuraava minitauko",
+    "afterMiniBreak_one": "{{count}} minitauon jälkeen",
+    "afterMiniBreak_other": "{{count}} minitauon jälkeen",
+    "resuming": "Jatketaan"
+  }
+}

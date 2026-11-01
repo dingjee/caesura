@@ -1,0 +1,126 @@
+{
+  "main": {
+    "warning": "Ibabalik nito ang defaults at lahat ng iyong mga setting ay mawawala.",
+    "toMicrobreak": "Mabilisang Pahinga",
+    "for5Hours": "5 oras",
+    "breakIn": "Matagalang Pahinga ng $t(utils.seconds, {'count': {{seconds}} })",
+    "toBreak": "Matagalang Pahinga",
+    "microbreakIn": "Mabilisang Pahinga ng $t(utils.seconds, {'count': {{seconds}} })",
+    "pause": "Ihinto Sandali Ang Pahinga",
+    "for2Hours": "2 oras",
+    "resetBreaks": "I-reset ang pahinga",
+    "restoreDefaults": "Ibalik ang defaults",
+    "resumingBreaks": "Bumabalik sa pagpapahinga",
+    "resume": "Magpahinga Ulit",
+    "forHour": "1 oras",
+    "untilMorning": "Hangang umaga",
+    "indefinitely": "Walang Katapusan",
+    "continue": "Ipagpatuloy",
+    "skipToTheNext": "Lumaktaw sa susunod",
+    "toolTipHeader": "Caesura - Ang app para sa pagpapaalala ng pagpahinga",
+    "cancel": "Bawiin",
+    "quitCaesura": "Itigil ang Caesura",
+    "downloadLatestVersion": "I-download ang kasalukuyang version",
+    "preferences": "Mga Kagustuhan"
+  },
+  "preferences": {
+    "about": {
+      "latestVersion": "Pinakabagong version ",
+      "version": "Version ",
+      "checkNewVersion": "Awtomatikong mag tsek ng mga update ng app",
+      "tagline": "A pause for poetry."
+    },
+    "theme": {
+      "morningSwim": "Morning swim",
+      "crystalGlass": "Crystal glass",
+      "windChime": "Wind chime",
+      "greenClouds": "Green clouds",
+      "autumnBeBlessed": "Autumn be blessed",
+      "graphiteCrystal": "Graphite crystal",
+      "coffeeKisses": "Coffee kisses",
+      "ticToc": "Tic toc",
+      "trayIcon": "Icon ng Menubar:",
+      "colour": "Colour",
+      "monochrome": "Monochrome",
+      "invertedMonochrome": "Inverted Monochrome",
+      "snowWhite": "Snow white",
+      "appearance": "Hitsura:",
+      "transparentMode": "Paganahin ang transparency",
+      "sounds": "Mga Tunog:",
+      "enableSounds": "Paganahin ang mga tunog"
+    },
+    "settings": {
+      "monitorIdleTime": "Subaybayan ang nakatigil na oras ng system (naka-pause ang mga pahinga kung nakatigil ang system).",
+      "openAtLogin": "Awtomatikong simulan ang caesura kapag naglogin",
+      "fullscreen": "Buong screen",
+      "showIdeas": "Ipakita ang mga tip sa pag ehersisyo kapag nasa pahinga",
+      "allScreens": "Ipakita ang pahinga sa lahat na mga monitor",
+      "monitorDnd": "Ipakita ang pahinga kahit nasa Do Not Disturb na pamamaraan",
+      "language": "Pumili ng wika:",
+      "restoreDefaults": "Ibalik ang defaults",
+      "showBreaksIn": "Ipakita ang pahinga sa:",
+      "window": "Bintana"
+    },
+    "schedule": {
+      "enableMiniBreaks": "Paganahin ang Mabilisang Pahinga",
+      "breakFor": "Magpahinga ng:",
+      "miniBreaks": "Mabilisang Pahinga:",
+      "miniBreaksInfo": "Ang Mabilisang Pahinga ay mga pahinga na palaging ginagawa para magbigay sa iyo ng pagkakataon para makapag mag-inat at magpalubay.",
+      "every": "Bawat:",
+      "showNotificationBeforeMiniBreak": "Ipakita ang abiso bago mag simula ang Mabilisang Pahinga",
+      "strictModeInfo": "Ang Istriktong Pamamaraan ay nagbabawal sa iyo na laktawan ang Mabilisang Pahinga o Matagalang Pahinga at nakadesinyo ito para makatulong para sa pagdisiplina.",
+      "enablePostponeMini": "Paganahin ang Pagpapaliban para sa Mabilisang Pahinga",
+      "enableLongBreaks": "Paganahin ang Matagalang Pahinga",
+      "cantDisableBoth": "Hindi maari na hindi paganahin ang dalawang klase ng pahinga",
+      "longBreaks": "Matagalang Pahinga:",
+      "showNotificationBeforeLongBreak": "Ipakita ang abiso bago magsimula ang Matagalang Pahinga",
+      "strictMode": "Istriktong Pamamaraan:",
+      "enableStrictMini": "Paganahin ang Istriktong Pamamaraan para sa Mabilisang Pahinga",
+      "enableStrictLong": "Paganahin ang Istriktong Pamamaraan para sa Matagalang Pahinga",
+      "longBreaksInfo": "Ang Matagalang Pahinga ay minsan lang ginagawa, pero ng matagalan, na nagpapahintulot sa iyo ng matagalang pahinga sa trabaho.",
+      "enablePostponeLong": "Paganahin ang Pagpapaliban para sa Matagalang Pahinga"
+    },
+    "title": "Mga Kagustuhan para sa Caesura",
+    "nav": {
+      "theme": "Tema",
+      "settings": "Mga Setting",
+      "schedule": "Talakdaan",
+      "about": "Tungkol"
+    }
+  },
+  "utils": {
+    "remaining": "{{count}} na natira",
+    "inAbout": "halos {{count}}",
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "percent_one": "{{count}} porsyento",
+    "percent_other": "{{count}} porsyento",
+    "oclock_one": "{{count}} o'clock",
+    "oclock_other": "{{count}} o'clock",
+    "seconds_one": "{{count}} segundo",
+    "seconds_other": "{{count}} segundo",
+    "minutes_one": "{{count}} minuto",
+    "minutes_other": "{{count}} minuto",
+    "hours_one": "{{count}} oras",
+    "hours_other": "{{count}} oras"
+  },
+  "process": {
+    "newVersionAvailable": "Bagong bersyon ay magagamit!"
+  },
+  "statusMessages": {
+    "paused": "Sandaling Nakahinto",
+    "indefinitely": "Walang katiyakan",
+    "dndMode": "Naka-on ang Do Not Disturb",
+    "nextLongBreak": "Susunod na Matagalang Pahinga",
+    "nextMiniBreak": "Susunod na Mabilisang Pahinga",
+    "appExclusion": "Panuntunan sa pagbubukod ng app",
+    "resuming": "Ipinagpapatuloy",
+    "afterMiniBreak_one": "pagkatapos ng {{count}} na Mabilisang Pahinga",
+    "afterMiniBreak_other": "pagkatapos ng {{count}} na Mabilisang Pahinga"
+  },
+  "break": {
+    "skip": "Ipagpaliban ang pahingang ito",
+    "postpone": "Itigil ang pahingang ito",
+    "title": "Oras na para magpahinga!"
+  }
+}

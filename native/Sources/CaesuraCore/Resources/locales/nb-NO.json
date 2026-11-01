@@ -1,0 +1,128 @@
+{
+  "utils": {
+    "none_one": "{{count}}",
+    "none_other": "{{count}}",
+    "oclock_one": "klokken {{count}}",
+    "oclock_other": "klokken {{count}}",
+    "inAbout": "om omkring {{count}}",
+    "remaining": "{{count}} igjen",
+    "hours_one": "{{count}} time",
+    "hours_other": "{{count}} timer",
+    "minutes_one": "{{count}} minutt",
+    "minutes_other": "{{count}} minutter",
+    "seconds_one": "{{count}} sekund",
+    "seconds_other": "{{count}} sekunder",
+    "percent_one": "{{count}} prosent",
+    "percent_other": "{{count}} prosent"
+  },
+  "preferences": {
+    "about": {
+      "notifyNewVersion": "Gi varsling om nye versjoner automatisk",
+      "version": "Versjon ",
+      "tagline": "A pause for poetry.",
+      "latestVersion": "Siste versjon ",
+      "checkNewVersion": "Se automatisk etter oppdatering"
+    },
+    "theme": {
+      "invertedMonochrome": "Invertert ensfarget",
+      "monochrome": "Ensfarget",
+      "colour": "Mangefarget",
+      "trayIcon": "Ikoner på menylinjen:",
+      "ticToc": "Tikk-takk",
+      "windChime": "Vindspill",
+      "crystalGlass": "Krystallglass",
+      "enableSounds": "Skru på lyder",
+      "sounds": "Lyder:",
+      "transparentMode": "Skru på gjennomsiktighet",
+      "morningSwim": "Morgensvømming",
+      "coffeeKisses": "Kaffekyss",
+      "graphiteCrystal": "Grafittkrystall",
+      "autumnBeBlessed": "Herlig høst",
+      "greenClouds": "Grønne skyer",
+      "appearance": "Utseende:",
+      "snowWhite": "Snøhvitt",
+      "reverie": "Dagdrøm"
+    },
+    "schedule": {
+      "cantDisableBoth": "Det er ikke mulig å skru av begge typer pauser",
+      "enableStrictLong": "Skru på streng modus for lange pauser",
+      "enableStrictMini": "Skru på streng modus for minipauser",
+      "strictModeInfo": "Streng modus lar deg ikke hoppe over minipauser eller lange pauser. Den er laget for å hjelpe på selvdisiplinen din.",
+      "strictMode": "Streng modus:",
+      "enablePostponeLong": "Skru på utsettelse av lange pauser",
+      "showNotificationBeforeLongBreak": "Vis varsel før lang pause starter",
+      "enableLongBreaks": "Skru på lange pauser",
+      "longBreaksInfo": "Lange pauser tas mindre regelmessig, men varer lenger. Dette lar deg ta utvidede pauser fra arbeidet ditt.",
+      "longBreaks": "Lange pauser:",
+      "enablePostponeMini": "Tillat utsettelse av minipauser",
+      "showNotificationBeforeMiniBreak": "Vis varsel før minipause starter",
+      "every": "Hver:",
+      "breakFor": "Pause i:",
+      "enableMiniBreaks": "Skru på minipauser",
+      "miniBreaksInfo": "Minipauser er korte pauser som tas regelmessig for å la deg ta en strekk og slappe av.",
+      "miniBreaks": "Minipauser:"
+    },
+    "settings": {
+      "restoreDefaults": "Tilbakestill forvalg",
+      "language": "Velg spåk:",
+      "monitorDnd": "Viser pauser selv i \"Ikke forstyrr\"-modus",
+      "monitorIdleTime": "Følg med på når maskinen ikke er i bruk (utsetter pauser hvis maskinen ikke brukes).",
+      "allScreens": "Vis pauser på alle skjermer",
+      "showIdeas": "Vis treningstips i pausene",
+      "fullscreen": "Fullskjerm",
+      "window": "Vindu",
+      "showBreaksIn": "Viser pauser i:",
+      "openAtLogin": "Start Caesura automatisk ved innlogging"
+    },
+    "nav": {
+      "about": "Om",
+      "theme": "Drakt",
+      "schedule": "Timeplan",
+      "settings": "Innstillinger"
+    },
+    "title": "Caesura-innstillinger"
+  },
+  "statusMessages": {
+    "afterMiniBreak_one": "etter {{count}} minipause",
+    "afterMiniBreak_other": "etter {{count}} minipauser",
+    "resuming": "Fortsettelse",
+    "nextMiniBreak": "Neste minipause",
+    "nextLongBreak": "Neste lange pause",
+    "dndMode": "\"Ikke forstyrr\" påslått",
+    "indefinitely": "På lang sikt",
+    "paused": "Pauset",
+    "appExclusion": "Regler for unntatte programmer"
+  },
+  "process": {
+    "newVersionAvailable": "Ny versjon tilgjengelig!"
+  },
+  "break": {
+    "title": "På tide med en pause!",
+    "skip": "Hopp over denne pausen",
+    "postpone": "Utsett denne pausen"
+  },
+  "main": {
+    "preferences": "Innstillinger",
+    "cancel": "Avbryt",
+    "continue": "Fortsett",
+    "warning": "Dette vil gjenopprette programforvalgene og alle dine innstillinger vil gå tapt.",
+    "restoreDefaults": "Tilbakestill forvalg",
+    "quitCaesura": "Avslutt Caesura",
+    "resetBreaks": "Tilbakestill pauser",
+    "indefinitely": "På ubestemt tid",
+    "forHour": "Én time",
+    "for2Hours": "To timer",
+    "for5Hours": "Fem timer",
+    "untilMorning": "Til i morgen tidlig",
+    "pause": "Utsett pause",
+    "resume": "Gjenoppta pauser",
+    "skipToTheNext": "Gå til neste",
+    "toMicrobreak": "Minipause",
+    "toBreak": "Lang pause",
+    "downloadLatestVersion": "Last ned siste versjon",
+    "resumingBreaks": "Gjenopptar pauser",
+    "breakIn": "Lang pause om $t(utils.seconds, {'count': {{seconds}} })",
+    "microbreakIn": "Minipause om $t(utils.seconds, {'count': {{seconds}} })",
+    "toolTipHeader": "Caesura - Pausepåminnelsesprogrammet"
+  }
+}
