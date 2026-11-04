@@ -26,10 +26,6 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
 
     var isNewVersion = false
     private var pausedForSuspendOrLock = false
-    /// True when the pause of a fullscreen video told the user once that the
-    /// accessibility permission is missing. The hint comes once per process:
-    /// a notice on every break would nag without helping.
-    private var didWarnAboutAccessibilityPermission = false
     private var versionCheckWorkItem: DispatchWorkItem?
     /// The end sound of a manual-await break is played once per break.
     private var didPlayManualAwaitSound = false
@@ -45,9 +41,8 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
 
     private var nextIdea: PendingIdea?
     private var lastBreak: (mini: Bool, idea: PendingIdea)?
-    /// The pause of a video in fullscreen for a break: it reads the playback
-    /// of the target, pauses it only when it plays, and resumes exactly it.
-    private let videoPlayback = VideoPlaybackController()
+    /// Coordinates a system media pause and its matching resume for a break.
+    private let mediaPlayback = SystemMediaPlaybackController()
 
     private var breakSession: BreakSession?
     private var preferencesWindow: OwnedWindow?
@@ -146,13 +141,9 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
             exit(0)
         }
 
-        // The identity of this process and what macOS tells it about the
-        // accessibility permission: the log is the first place to look when
-        // a permission seems to be missing (the permission belongs to this
-        // binary — a rebuild that changes its signature asks for it again).
+        // Identify the installed process in diagnostics.
         Log.info("Caesura: running as \(Bundle.main.bundleIdentifier ?? "-") "
                  + "(\(Bundle.main.bundleURL.path))")
-        Log.info("Caesura: accessibility permission granted: \(VideoPlayback.canUseAccessibility)")
 
         Notifier.shared.configure()
         NotificationCenter.default.addObserver(forName: Notifier.openPreferencesNotification,
@@ -246,6 +237,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         Notifier.shared.cancelPendingDismissals()
+        mediaPlayback.shutdown()
         Log.info("Caesura: terminated")
         Log.flush()
     }
@@ -311,7 +303,6 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         startMonitors()
         registerHotkeys()
         planVersionCheck(seconds: 1)
-        checkMediaKeyPermission()
 
         statusBar?.remove()
         statusBar = StatusBarController(settings: settings, localization: localization, planner: planner)
@@ -325,8 +316,6 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
             openPreferences: { [weak self] in self?.createPreferencesWindow() },
             showTodaysPoem: { [weak self] in self?.createPoemWindow() },
             quit: { [weak self] in
-                // A video that was paused for a break has to play again.
-                self?.videoPlayback.resumeIfNeeded()
                 NSApp.terminate(nil)
             },
             openDownloads: { [weak self] in self?.openExternal("https://github.com/dingjee/caesura/releases") }
@@ -410,17 +399,6 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
     }
 
     // MARK: Initialization helpers
-
-    /// The pause of a video in fullscreen reads and presses the controls of
-    /// another application, which needs the accessibility permission. Without
-    /// it the feature cannot work, so the user is told once where to grant it.
-    private func checkMediaKeyPermission() {
-        guard settings.getBool("pauseFullscreenVideo") else { return }
-        guard !VideoPlayback.canUseAccessibility else { return }
-        Log.warn("Caesura: the accessibility permission is missing, "
-                 + "a video in fullscreen cannot be paused until it is granted "
-                 + "(Preferences → Breaks)")
-    }
 
     private func syncLoginItem() {
         // An isolated run must never change the login item of the real installation.
@@ -606,13 +584,8 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         return true
     }
 
-    /// The status of this process, as JSON: the identity of the application
-    /// that is really running and what macOS tells it about the accessibility
-    /// permission.
-    ///
-    /// The command line client asks the running instance for it, so the answer
-    /// is about that process — the accessibility permission of the *client* is
-    /// a different thing and would tell nothing about the application.
+    /// The identity and media policy of the running application, as JSON.
+    /// The command line client asks this process for its current snapshot.
     private func statusAnswer(for argv: [String]) -> String? {
         let command = Command(input: argv, version: AppPaths.version)
         guard command.command == "status", command.hasSupportedCommand else { return nil }
@@ -628,16 +601,16 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
                 "bundleIdentifier": Bundle.main.bundleIdentifier ?? "",
                 "bundlePath": Bundle.main.bundleURL.path,
                 "executablePath": Bundle.main.executableURL?.path ?? "",
-                "accessibilityTrusted": VideoPlayback.canUseAccessibility,
-                "pauseVideoPlayback": self?.settings?.getBool("pauseFullscreenVideo") ?? false,
+                "mediaBackend": "systemNowPlaying",
+                "pauseMediaPlayback": self?.settings?.getBool("pauseFullscreenVideo") ?? false,
+                "mediaPlaybackAllowedApps": self.map { Array($0.mediaAllowedBundleIdentifiers).sorted() } ?? [],
             ]
         }
         // The answer is one line: the frame of the socket is newline
         // terminated, so a pretty printed payload would break it.
         guard let data = try? JSONSerialization.data(withJSONObject: status, options: [.sortedKeys]),
               let text = String(data: data, encoding: .utf8) else { return nil }
-        Log.info("Caesura: status requested — accessibility trusted: "
-                 + "\(status["accessibilityTrusted"] ?? false), bundle: "
+        Log.info("Caesura: status requested — system media backend, bundle: "
                  + "\(status["bundleIdentifier"] ?? ""), executable: "
                  + "\(status["executablePath"] ?? "")")
         return text
@@ -852,10 +825,9 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         // and the idle screen saver must not bring the lock screen up behind
         // it, so the break ends on the desktop it covered.
         displaySleep.begin()
-        // The video is paused before the break covers the screen: the target
-        // application is still the one in front, and its controls are read
-        // while they are in the state the user left them in.
-        pauseVideoPlaybackIfNeeded()
+        // Start a cancellable system media pause for this break. The backend
+        // follows the system media session, independently of window focus.
+        pauseMediaPlaybackIfNeeded()
         session.show(screens: screenManager.targetScreens(),
                      contentScreen: screenManager.contentDisplayScreen(),
                      settings: settings)
@@ -953,10 +925,9 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         // and the idle screen saver must not bring the lock screen up behind
         // it, so the break ends on the desktop it covered.
         displaySleep.begin()
-        // The video is paused before the break covers the screen: the target
-        // application is still the one in front, and its controls are read
-        // while they are in the state the user left them in.
-        pauseVideoPlaybackIfNeeded()
+        // Start a cancellable system media pause for this break. The backend
+        // follows the system media session, independently of window focus.
+        pauseMediaPlaybackIfNeeded()
         session.show(screens: screenManager.targetScreens(),
                      contentScreen: screenManager.contentDisplayScreen(),
                      settings: settings)
@@ -1168,8 +1139,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
     private func completeBreak(mini: Bool, shouldPlaySound: Bool, outcome: BreakSession.Outcome) {
         unregisterEndBreakShortcut()
         displaySleep.end()
-        videoPlayback.resumeIfNeeded()
-        warnAboutMissingAccessibilityPermission()
+        mediaPlayback.endBreak()
         if shouldPlaySound && !settings.getBool("silentNotifications") {
             audio.play(value: settings.getString(mini ? "miniBreakAudio" : "longBreakAudio"))
         }
@@ -1180,31 +1150,14 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         breakSession = nil
     }
 
-    /// Tells the user once per process that the accessibility permission is
-    /// missing. The hint comes after the break: the screen belongs to the break
-    /// while it runs, and the user can open the preferences with a click on
-    /// the notice. The state also stays visible in Preferences → Breaks, so a
-    /// notice on every break would only nag without helping.
-    private func warnAboutMissingAccessibilityPermission() {
-        guard !didWarnAboutAccessibilityPermission else { return }
-        guard !VideoPlayback.canUseAccessibility else { return }
-        guard settings.getBool("pauseFullscreenVideo") else { return }
-        didWarnAboutAccessibilityPermission = true
-        Log.info("Caesura: a video in fullscreen could not be read or paused, "
-                 + "the accessibility permission is missing")
-        Notifier.shared.show(text: localization.t("main.mediaKeyPermissionMissing"),
-                             silent: true, identifier: "media-key-permission",
-                             openPreferences: true, autoDismissAfter: 30)
+    private var mediaAllowedBundleIdentifiers: Set<String> {
+        Set(MediaAllowedApplication.parse(settings.get(MediaAllowedApplication.settingKey)).map(\.id))
     }
 
-    /// Pauses a video that plays, so that the break does not talk over it.
-    /// Only a playback that could be read and confirmed is paused, and only
-    /// it is resumed when the break ends.
-    private func pauseVideoPlaybackIfNeeded() {
-        // The setting keeps its old name so that an existing profile keeps
-        // its choice; it covers every video now, not only a fullscreen one.
+    private func pauseMediaPlaybackIfNeeded() {
+        // Preserve the stored preference while broadening it to system media.
         guard settings.getBool("pauseFullscreenVideo") else { return }
-        videoPlayback.pauseIfNeeded()
+        mediaPlayback.beginBreak(allowedBundleIdentifiers: mediaAllowedBundleIdentifiers)
     }
 
     private func postponeCurrentBreak(mini: Bool) {
@@ -1467,12 +1420,6 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         if key == "mainColor" {
             settings.set("miniBreakColor", value)
         }
-        if key == "pauseFullscreenVideo", value.boolValue == true {
-            // Reading and pressing the controls of another application needs
-            // the accessibility permission: the user is asked for it when the
-            // feature is switched on.
-            VideoPlayback.requestAccessibilityPermission()
-        }
         if key == "showTrayIcon" {
             settings.set("showTrayIcon", value)
             if value.boolValue == false {
@@ -1496,6 +1443,9 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
     /// Reinitialize-on-change behaviors that legacy handled in `initialize(false)`.
     private func handleSettingChanged(key: String) {
         switch key {
+        case "pauseFullscreenVideo", MediaAllowedApplication.settingKey:
+            mediaPlayback.updateAllowedApplications(mediaAllowedBundleIdentifiers)
+            if !settings.getBool("pauseFullscreenVideo") { mediaPlayback.endBreak() }
         case "language":
             statusBar.refresh()
             refreshOpenWindows()
@@ -1601,17 +1551,8 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         window.contentView = NSHostingView(rootView: PreferencesView(controller: controller))
         window.center()
         let owner = OwnedWindow(window: window)
-        // The user grants the permission in the system settings: the window
-        // becomes key again when they come back, and the state of the
-        // permission is read again.
-        let keyObserver = NotificationCenter.default.addObserver(
-            forName: NSWindow.didBecomeKeyNotification, object: window, queue: .main
-        ) { [weak self] _ in
-            self?.preferencesController?.refreshAccessibilityState()
-        }
         owner.onClosed = { [weak self, weak owner, weak window] in
             guard let self, let owner else { return }
-            NotificationCenter.default.removeObserver(keyObserver)
             if let window { self.lifecycleRecordClosedWindow("preferences", window) }
             if self.preferencesWindow === owner {
                 self.preferencesWindow = nil

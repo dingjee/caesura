@@ -61,14 +61,14 @@ enum CliIpcTests {
         let expectation = DispatchSemaphore(value: 0)
         server.onArgv = { argv in
             expectation.signal()
-            return "{\"argv\":\"\(argv.joined(separator: " "))\",\"accessibilityTrusted\":true}"
+            return "{\"argv\":\"\(argv.joined(separator: " "))\",\"pauseMediaPlayback\":true}"
         }
         try expectTrue(server.start(socketURL: socketURL), "server start failed: \(server.lastError)")
         let (result, answer) = CliForwarder.request(argvJSON: Data("{\"argv\":[\"status\"]}".utf8),
                                                     socketURL: socketURL)
         try expectEqual(result, .forwarded)
         try expectTrue(expectation.wait(timeout: .now() + 5) == .success)
-        try expectEqual(answer ?? "", "{\"argv\":\"status\",\"accessibilityTrusted\":true}")
+        try expectEqual(answer ?? "", "{\"argv\":\"status\",\"pauseMediaPlayback\":true}")
         server.stop()
     }
 

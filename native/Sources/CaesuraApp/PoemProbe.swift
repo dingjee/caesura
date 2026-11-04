@@ -231,8 +231,7 @@ enum PoemProbe {
                                       "bridge": bridgeProbe(directory: directory),
                                       "viewport": viewportProbe(),
                                       "focus": focusProbe(directory: directory),
-                                      "reveal": RevealProbe.run(),
-                                      "video": VideoPlaybackProbe.run()]
+                                      "reveal": RevealProbe.run()]
         if let data = try? JSONSerialization.data(withJSONObject: summary,
                                                   options: [.prettyPrinted, .sortedKeys]),
            let text = String(data: data, encoding: .utf8) {

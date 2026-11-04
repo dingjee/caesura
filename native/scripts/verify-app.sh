@@ -59,6 +59,22 @@ for name in Caesura caesura-cli; do
   }
 done
 
+# Older valid rollbacks predate the system-media bridge. A new package that
+# contains it must include every component and only arm64 native code.
+bridge="$APP/Contents/Frameworks/MediaRemoteAdapter.framework"
+bridge_resources="$APP/Contents/Resources/MediaRemoteAdapter"
+if [[ -e "$bridge" || -e "$bridge_resources" ]]; then
+  [[ -x "$bridge/MediaRemoteAdapter" ]] || { echo "Missing media bridge binary" >&2; exit 1; }
+  [[ "$(lipo -archs "$bridge/MediaRemoteAdapter")" == arm64 ]] || { echo "Unexpected media bridge architecture" >&2; exit 1; }
+  codesign --verify --strict "$bridge"
+  for resource in mediaremote-adapter.pl LICENSE PROVENANCE.md; do
+    [[ -s "$bridge_resources/$resource" ]] || { echo "Missing media bridge resource: $resource" >&2; exit 1; }
+  done
+  if [[ -n "$EXPECTED_IDENTITY" ]]; then
+    [[ "$(signature_authority "$bridge")" == "$EXPECTED_IDENTITY" ]] || { echo "Unexpected media bridge signer" >&2; exit 1; }
+  fi
+fi
+
 residue="$(find "$APP/Contents" \( -iname '*electron*' -o -iname '*chromium*' \
   -o -iname '*libnode*' -o -name node_modules -o -name '*.asar' \) -print)"
 if [[ -n "$residue" ]]; then

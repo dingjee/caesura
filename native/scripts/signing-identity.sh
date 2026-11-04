@@ -51,6 +51,9 @@ sign_bundle() {
   identity="$(resolve_sign_identity)"
   if [[ -n "$identity" ]]; then
     echo "== codesign with the identity: $identity =="
+    if [[ -d "$app/Contents/Frameworks/MediaRemoteAdapter.framework" ]]; then
+      codesign --force --sign "$identity" "$app/Contents/Frameworks/MediaRemoteAdapter.framework"
+    fi
     for bin in caesura-cli Caesura; do
       if [[ -x "$app/Contents/MacOS/$bin" ]]; then
         codesign --force --sign "$identity" "$app/Contents/MacOS/$bin"

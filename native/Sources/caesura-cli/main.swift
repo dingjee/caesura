@@ -45,8 +45,8 @@ let payload: [String: Any] = ["argv": args]
 guard let data = try? JSONSerialization.data(withJSONObject: payload) else { exit(3) }
 
 // The status is answered by the running instance: the client asks the
-// process that is really running, so the answer is about that process (its
-// accessibility permission, its bundle) and not about the client.
+// process that is really running, so the answer describes its bundle and
+// media policy rather than the command-line client's environment.
 if command.command == "status" {
     let (result, answer) = CliForwarder.request(argvJSON: data,
                                                 socketURL: AppPaths.socketURL(dataDirectory: dataDirOverride))

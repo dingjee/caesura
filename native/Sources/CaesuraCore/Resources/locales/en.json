@@ -1,7 +1,6 @@
 {
   "main": {
     "toolTipHeader": "Caesura - The break time reminder app",
-    "mediaKeyPermissionMissing": "Caesura needs the accessibility permission to pause a video that plays. Grant it in Preferences → Breaks.",
     "microbreakIn": "Mini break in $t(utils.seconds, {'count': {{seconds}} })",
     "breakIn": "Long break in $t(utils.seconds, {'count': {{seconds}} })",
     "resumingBreaks": "Resuming breaks",
@@ -71,17 +70,19 @@
       "longBreaksInfo": "Long breaks are taken less regularly, but are of greater duration, allowing you to take an extended break from your work.",
       "enableLongBreaks": "Enable Long breaks",
       "showNotificationBeforeLongBreak": "Show notification before Long break starts",
-      "pauseFullscreenVideo": "Pause a video that plays",
-      "pauseFullscreenVideoInfo": "The video is paused while the break is on the screen and played again when it ends. Works with the frontmost application when Caesura can read its play/pause control over the accessibility interface: in a fullscreen window, or in a video element of a page.",
-      "pauseFullscreenVideoPermission": "macOS only lets Caesura read and press the play/pause control of another application with the accessibility permission. The permission belongs to the installed application: a rebuild that changes its signature can ask for it again.",
-      "pauseFullscreenVideoPermissionGranted": "Caesura may read and press the play/pause control.",
-      "grantMediaKeyPermission": "Grant the permission",
+      "pauseFullscreenVideo": "Pause media during breaks",
+      "pauseFullscreenVideoInfo": "Pause the current system media session during Mini and Long breaks, then resume only the same session that Caesura paused. Apps in the allowlist keep playing.",
       "enablePostponeLong": "Enable postponement for Long break",
       "strictMode": "Strict mode:",
       "strictModeInfo": "Strict mode prevents you from skipping either Mini breaks or Long breaks and is designed to help discipline.",
       "enableStrictMini": "Enable Strict mode for Mini breaks",
       "enableStrictLong": "Enable Strict mode for Long breaks",
-      "cantDisableBoth": "It is not possible to disable both types of breaks"
+      "cantDisableBoth": "It is not possible to disable both types of breaks",
+      "mediaTitle": "Media during breaks",
+      "mediaAllowedInfo": "Keep media playing in these apps. Other apps can be paused during breaks.",
+      "mediaAllowedAdd": "Add app…",
+      "mediaAllowedRemove": "Remove {{name}} from allowed apps",
+      "mediaAllowedEmpty": "No apps are exempt from media pause."
     },
     "theme": {
       "appearance": "Appearance:",

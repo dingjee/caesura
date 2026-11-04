@@ -15,3 +15,11 @@ their author and title attribution in the application and catalog.
 
 The application uses fonts and optional system sounds supplied by macOS.
 Caesura's two-slash application and menu bar marks are original vector artwork.
+
+The system media bridge includes MediaRemote Adapter by Jonas van den Berg and
+contributors, licensed under the BSD 3-Clause License. Its pinned upstream
+revision, local changes and full license are retained in
+`native/Vendor/MediaRemoteAdapter/PROVENANCE.md` and `LICENSE` in that directory.
+The packaged application includes these documents under
+`Contents/Resources/MediaRemoteAdapter/`. Upstream:
+https://github.com/ungive/mediaremote-adapter

@@ -52,18 +52,14 @@ reader sees when they move the reading area themselves.
 
 Idle time, sleep, lock, app exclusions and the Focus heuristic can pause the
 schedule. Strict Mode restricts dismissal; Manual Finish waits for your action.
-An optional video feature pauses and resumes readable video playback in the
-frontmost application. Browser windows, including fullscreen ones, must expose
-a video element (`AXVideo`) containing a play/pause control, or the verified
-YouTube player and its own play/pause button. Safari can omit `AXVideo` for
-YouTube: that player is matched by its DOM identity and HTTPS YouTube page,
-and playback is resumed only while the same page and controls remain.
-Both bracketed and spoken shortcut labels (such as `Play keyboard shortcut k`)
-are recognized.
-Audio elements do not qualify. Known native video players also retain their
-fullscreen control fallback. Other custom web players without recognizable
-video controls remain unsupported. The feature needs Caesura's accessibility permission, requested
-only from its Preferences button.
+An optional media feature pauses the current macOS Now Playing session during
+Mini and Long breaks, then resumes only the same playback that Caesura paused.
+It covers audio and video that participate in system media controls, including
+normal and fullscreen browser playback. Settings → Breaks → Media during breaks
+lets you add or remove apps that keep playing. Spotify and the local AlgerMusic
+trial are allowed by default. The allowlist affects media only, not scheduling.
+The backend uses a bundled MediaRemote bridge; it does not inspect website
+buttons, request Accessibility permission or maintain per-site adapters.
 
 A break opens with a soft radial reveal: the blurred background and the poem
 appear together in one wave that crosses the display boundaries, and they leave
@@ -93,6 +89,11 @@ native/scripts/verify-app.sh native/dist/Caesura.app
 open native/dist/Caesura.app
 ```
 
+`native/scripts/system-media-playback-test.sh` drives the actual media
+controller and parser with a fake transport. `native/scripts/mediaremote-guard-test.sh`
+checks the native command guard with a fake system API. Neither controls real
+media. The older website-specific AX fixtures have been removed.
+
 `test.sh` compiles the application and runs the custom `caesura-core-tests`
 executable; this package does not use `swift test`. `radial-mask-test.sh`
 compiles the actual mask raster of the break reveal together with a small
@@ -100,12 +101,12 @@ pixel check and asserts its real pixels — the opaque centre, the clear
 exterior, the feathered edge, the exact hidden and full endpoints and the
 bounded allocation. It renders offscreen and never shows a window. The
 offscreen probe (`CAESURA_POEM_PROBE=<directory>`) renders the poem, the
-reading viewport, the reveal and the rules of the video playback into images
+reading viewport and the reveal into images
 and a JSON report, again without showing a window. Build scripts select an
 installed Xcode for their own process when available, without changing global
 developer-tool selection. The releases are Apple Silicon only: the packaging
 builds arm64 and refuses a universal build, and the verification accepts
-nothing but arm64 in the packaged executables:
+nothing but arm64 in the packaged executables and media framework:
 
 ```sh
 native/scripts/package-app.sh
@@ -150,8 +151,8 @@ releases.
 
 GUI checks are optional development tools. Use a temporary `--data-dir` profile,
 a secondary display, no activation and no sounds. With no secondary display,
-skip GUI checks; never silently use the working display. The fullscreen-video
-check requires a separate explicit opt-in and remains off by default. See
+skip GUI checks; never silently use the working display. Real media control
+and fullscreen checks require explicit opt-in. See
 [verification](docs/VERIFICATION.md) for the checks actually performed.
 
 ## Persistent local installation
@@ -207,9 +208,8 @@ dist/Caesura.app/Contents/MacOS/caesura-cli logs
 Commands include `help`, `version`, `logs`, `reset`, `pause`, `resume`, `toggle`,
 `mini`, `long`, `last`, `postpone`, `skip`, `finish`, `preferences` and
 `status`. `status` asks the running instance and answers with the identity of
-the process that is really running — its bundle, its executable, whether macOS
-trusts it for accessibility, and whether the video feature is on. It never
-measures the permission of the client that asks:
+the process that is really running — its bundle, its executable, whether media
+pause is enabled, and the allowed application identities:
 
 ```sh
 dist/Caesura.app/Contents/MacOS/caesura-cli status
@@ -254,10 +254,10 @@ provenance and credits; both documents ship inside the application bundle.
 
 ## Known issues
 
-Focus detection is a heuristic. The video feature depends on the accessibility
-interface of the target application: a playback whose play/pause control
-cannot be read is left alone, and the search through a very large page is cut
-short after a fixed budget (the report then says so). Real permission prompts,
-physical display hot-plug and sleep/lock need manual integration verification.
+Focus detection is a heuristic. Media pause covers applications that report a
+Now Playing session to macOS; applications outside that system remain
+uncontrolled. MediaRemote is a private framework, so OS updates may require
+bridge maintenance. Unavailable or ambiguous session state is left untouched.
+Physical display hot-plug and sleep/lock need manual integration verification.
 Distribution is not notarized. Report issues with the macOS version,
 CPU architecture, build revision and relevant logs with private data removed.

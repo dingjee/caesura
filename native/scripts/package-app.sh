@@ -71,6 +71,16 @@ cp -R "$RSRC_BUNDLE" "$APP/Contents/Resources/"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE.txt"
 cp "$ROOT/THIRD_PARTY_NOTICES.md" "$APP/Contents/Resources/ThirdPartyNotices.txt"
 
+# Bundle the pinned system-media bridge; users need no package-manager setup.
+mkdir -p "$APP/Contents/Frameworks" "$APP/Contents/Resources/MediaRemoteAdapter"
+"$ROOT/native/scripts/build-mediaremote.sh" "$APP/Contents/Frameworks/MediaRemoteAdapter.framework"
+cp "$ROOT/native/Vendor/MediaRemoteAdapter/bin/mediaremote-adapter.pl" \
+  "$APP/Contents/Resources/MediaRemoteAdapter/mediaremote-adapter.pl"
+cp "$ROOT/native/Vendor/MediaRemoteAdapter/LICENSE" \
+  "$APP/Contents/Resources/MediaRemoteAdapter/LICENSE"
+cp "$ROOT/native/Vendor/MediaRemoteAdapter/PROVENANCE.md" \
+  "$APP/Contents/Resources/MediaRemoteAdapter/PROVENANCE.md"
+
 # The packaged binary must be the one that was just built.
 BUILT_UUID=$(dwarfdump --uuid "$BIN_DIR/Caesura" 2>/dev/null | awk '{print $2}')
 PACKED_UUID=$(dwarfdump --uuid "$APP/Contents/MacOS/Caesura" 2>/dev/null | awk '{print $2}')

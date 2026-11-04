@@ -25,8 +25,8 @@
   authority, the team and the stable designated requirement of the signature.
 - A `status` command for the command line client: it asks the running
   instance and answers with the identity of the process that is really
-  running — its bundle, its executable, whether macOS trusts it for
-  accessibility and whether the video feature is on.
+  running — its bundle, its executable, the system media policy and the
+  allowed applications.
 
 ### Changed
 
@@ -73,21 +73,13 @@
   poem is repeated the configured number of extra full readings ("+ n",
   0–9, default 2) before the next poem of the rotation begins. Skipped,
   postponed or cancelled breaks still do not count.
-- The optional video feature now covers normal browser windows in the
-  frontmost application. Browser controls must belong to an `AXVideo`
-  element or the verified YouTube player, including in fullscreen; audio
-  elements do not qualify. Safari's YouTube player is recognized by its DOM
-  identity and HTTPS page even when no `AXVideo` is exposed; resume also checks
-  that the full page URL and the original controls remain unchanged. Spoken
-  YouTube shortcut labels such as `Play keyboard shortcut k` are recognized
-  for pause confirmation and resume. Known
-  native video players retain their fullscreen control fallback. The search through the
-  accessibility tree of the target shares one budget, so a huge page can
-  never hold the scheduler, and a report that was cut short says so. Only a
-  control that really says "Pause" is pressed, and only the very same control
-  of the very same video element is pressed again to resume it — a page that
-  navigated away, a video that was replaced and a target that is gone are
-  left alone.
+- Replace all website-specific and AX video-control adapters with a system
+  Now Playing media backend. Mini and Long breaks pause participating audio or
+  video sessions and resume only the same session paused for that break.
+- Add an editable application allowlist in Breaks settings. Spotify and the
+  local AlgerMusic trial keep playing by default; adding or removing apps does
+  not pause or otherwise change the break schedule. Remove obsolete media
+  Accessibility prompts and website-specific test fixtures.
 - The cursor on the poem or on its author line keeps both visible as one
   group; moving it away fades them out softly (never earlier than the
   planned schedule), and pointing at the hidden text calls the poem back

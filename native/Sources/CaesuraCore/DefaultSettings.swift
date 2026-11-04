@@ -68,7 +68,8 @@ public enum SettingsPolicy {
     ]
 
     public static let arrayKeys: Set<String> = [
-        "appExclusions", "breakIdeas", "microbreakIdeas"
+        "appExclusions", "breakIdeas", "microbreakIdeas",
+        MediaAllowedApplication.settingKey
     ]
 
     /// Returns the replacement value when `value` is unsafe for `key`, or nil when valid.
@@ -207,6 +208,9 @@ public enum DefaultSettings {
         // Native-only: a video that plays in fullscreen is paused during a
         // break and resumed when it ends.
         "pauseFullscreenVideo": .bool(true),
+        // Native-only: the applications whose media session keeps playing
+        // during a break. Every other media session is paused and resumed.
+        MediaAllowedApplication.settingKey: .array(MediaAllowedApplication.defaults.map(\.settingsValue)),
         "miniBreakManualFinish": .bool(false),
         "longBreakManualFinish": .bool(false),
         "breakHealthMode": .bool(false),

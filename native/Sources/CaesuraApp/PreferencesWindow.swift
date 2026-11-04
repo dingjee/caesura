@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 import CaesuraCore
 
 /// Native preferences for the schedule, poetry, appearance and application.
@@ -7,11 +8,6 @@ final class PreferencesController: ObservableObject {
     let settings: SettingsStore
     weak var coordinator: AppCoordinator?
     @Published var snapshot: [String: SettingsValue]
-    /// True when macOS lets the app read and press the controls of another
-    /// application. The permission is granted in the system settings, so the
-    /// state can change while the app is in the background.
-    @Published var accessibilityAllowed = VideoPlayback.canUseAccessibility
-
     init(localization: Localization, settings: SettingsStore, coordinator: AppCoordinator) {
         self.localization = localization
         self.settings = settings
@@ -24,13 +20,38 @@ final class PreferencesController: ObservableObject {
         objectWillChange.send()
     }
 
-    /// Reads the permission again: the user may have granted it in the system
-    /// settings in the meantime.
-    func refreshAccessibilityState() {
-        let allowed = VideoPlayback.canUseAccessibility
-        guard allowed != accessibilityAllowed else { return }
-        accessibilityAllowed = allowed
-        Log.info("Caesura: the accessibility permission was granted")
+    var mediaAllowedApplications: [MediaAllowedApplication] {
+        MediaAllowedApplication.parse(settings.get(MediaAllowedApplication.settingKey))
+    }
+
+    func addMediaAllowedApplications() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.application]
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.prompt = localization.t("preferences.schedule.mediaAllowedAdd")
+        guard panel.runModal() == .OK else { return }
+        var applications = mediaAllowedApplications
+        var identities = Set(applications.map(\.id))
+        for url in panel.urls {
+            guard let bundle = Bundle(url: url), let identifier = bundle.bundleIdentifier,
+                  let application = MediaAllowedApplication(bundleIdentifier: identifier,
+                    name: bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+                        ?? bundle.object(forInfoDictionaryKey: "CFBundleName") as? String
+                        ?? url.deletingPathExtension().lastPathComponent) else { continue }
+            if identities.insert(application.id).inserted { applications.append(application) }
+        }
+        saveMediaAllowedApplications(applications)
+    }
+
+    func removeMediaAllowedApplication(_ application: MediaAllowedApplication) {
+        saveMediaAllowedApplications(mediaAllowedApplications.filter { $0.id != application.id })
+    }
+
+    private func saveMediaAllowedApplications(_ applications: [MediaAllowedApplication]) {
+        coordinator?.saveSetting(key: MediaAllowedApplication.settingKey,
+                                value: .array(applications.map(\.settingsValue)))
+        snapshot = settings.values
     }
 
     // MARK: Typed accessors
@@ -317,12 +338,6 @@ struct PreferencesView: View {
                                   format: { value in "\(Int(value)) ×" })
                     Toggle(t("preferences.schedule.showNotificationBeforeLongBreak"),
                            isOn: controller.bool("breakNotification"))
-                    Toggle(t("preferences.schedule.pauseFullscreenVideo"),
-                           isOn: controller.bool("pauseFullscreenVideo"))
-                        .help(t("preferences.schedule.pauseFullscreenVideoInfo"))
-                    if controller.settings.getBool("pauseFullscreenVideo") {
-                        mediaKeyPermissionRow
-                    }
                     Toggle(t("preferences.schedule.enablePostponeLong"), isOn: controller.bool("breakPostpone"))
                     if !controller.settings.getBool("hideStrictModePreferences") {
                         Toggle(t("preferences.schedule.enableStrictLong"), isOn: controller.bool("breakStrictMode"))
@@ -332,6 +347,8 @@ struct PreferencesView: View {
                 .padding(6)
             }
 
+            mediaPlaybackSettings
+
             if !controller.settings.getBool("microbreak") && !controller.settings.getBool("break") {
                 Text(t("preferences.schedule.cantDisableBoth"))
                     .foregroundStyle(.red)
@@ -340,29 +357,41 @@ struct PreferencesView: View {
         }
     }
 
-    /// The state of the permission that reading and pressing the controls of
-    /// another application needs.
-    ///
-    /// The permission is granted in the system settings of macOS, so the row
-    /// follows the state of the system: it disappears as soon as the user
-    /// allows Caesura there.
-    @ViewBuilder
-    private var mediaKeyPermissionRow: some View {
-        if controller.accessibilityAllowed {
-            Label(t("preferences.schedule.pauseFullscreenVideoPermissionGranted"),
-                  systemImage: "checkmark.circle")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-        } else {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(t("preferences.schedule.pauseFullscreenVideoPermission"))
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                Button(t("preferences.schedule.grantMediaKeyPermission")) {
-                    VideoPlayback.requestAccessibilityPermission()
+    private var mediaPlaybackSettings: some View {
+        GroupBox(label: Text(t("preferences.schedule.mediaTitle")).font(.headline)) {
+            VStack(alignment: .leading, spacing: 10) {
+                Toggle(t("preferences.schedule.pauseFullscreenVideo"),
+                       isOn: controller.bool("pauseFullscreenVideo"))
+                    .help(t("preferences.schedule.pauseFullscreenVideoInfo"))
+                if controller.settings.getBool("pauseFullscreenVideo") {
+                    Text(t("preferences.schedule.mediaAllowedInfo"))
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    ForEach(controller.mediaAllowedApplications) { application in
+                        HStack {
+                            Text(application.name)
+                            Spacer()
+                            Button {
+                                controller.removeMediaAllowedApplication(application)
+                            } label: {
+                                Image(systemName: "minus.circle")
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel(controller.localization.t("preferences.schedule.mediaAllowedRemove",
+                                options: ["name": application.name]))
+                        }
+                    }
+                    if controller.mediaAllowedApplications.isEmpty {
+                        Text(t("preferences.schedule.mediaAllowedEmpty"))
+                            .font(.callout).foregroundStyle(.secondary)
+                    }
+                    Button(t("preferences.schedule.mediaAllowedAdd")) {
+                        controller.addMediaAllowedApplications()
+                    }
                 }
             }
+            .padding(6)
         }
     }
 
