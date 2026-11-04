@@ -227,14 +227,16 @@ run_scenario tray-restore \
 
 echo
 echo "== scenario: break windows relayout and release =="
+# The skip ends the break with a visual tail: the window is released when the
+# tail has run out, so the release is checked after it.
 run_scenario break-relayout \
-  "mini,wait:1,break-visible,relayout,released:break-0,break-visible,skip,released:break-0,tray" \
+  "mini,wait:1,break-visible,relayout,released:break-0,break-visible,skip,wait:1,released:break-0,tray" \
   180 "lifecycle test finished successfully"
 
 echo
 echo "== scenario: break window release after skip =="
 run_scenario break-release \
-  "mini,wait:1,skip,released:break-0,tray" \
+  "mini,wait:1,skip,wait:1,released:break-0,tray" \
   120 "lifecycle test finished successfully"
 
 echo

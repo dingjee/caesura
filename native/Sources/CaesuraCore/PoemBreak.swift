@@ -210,6 +210,39 @@ public struct PoemTimeline: Equatable {
         return PoemTimeline(fadeInMillis: fadeIn, holdMillis: hold, fadeOutMillis: fadeOut)
     }
 
+    /// The pace of a calm reader, used to size the visible window of the
+    /// complete poem and the pace of its travel.
+    public static let readingWordsPerMinute: Double = 220
+
+    /// The envelope of the complete poem.
+    ///
+    /// The hold grows with the amount of text: a longer poem is visible for
+    /// about its reading time (a calm 220 words a minute), a short one keeps
+    /// the standard envelope of its break. The envelope never outlasts the
+    /// break itself — the poem is gone when the break ends, however long the
+    /// text is.
+    public static func full(mini: Bool, toDuration durationMillis: Int64,
+                            wordCount: Int) -> PoemTimeline {
+        let standard = standard(mini: mini)
+        guard durationMillis > 0 else {
+            // An illegal duration shows nothing at all.
+            return PoemTimeline(fadeInMillis: 0, holdMillis: 0, fadeOutMillis: 0)
+        }
+        let reading = Int64((Double(max(0, wordCount)) / readingWordsPerMinute
+                             * 60_000).rounded())
+        // The room the break leaves for the hold: the fades keep their share.
+        let holdCap = max(0, durationMillis - standard.fadeInMillis - standard.fadeOutMillis)
+        let hold = min(max(standard.holdMillis, reading), holdCap)
+        let envelope = PoemTimeline(fadeInMillis: standard.fadeInMillis, holdMillis: hold,
+                                    fadeOutMillis: standard.fadeOutMillis)
+        if envelope.totalMillis > durationMillis {
+            // A break shorter than the fades of the standard envelope keeps
+            // every phase's ratio: the poem may not outlast the break.
+            return scaled(mini: mini, toDuration: durationMillis)
+        }
+        return envelope
+    }
+
     /// The opacity of the poem at that moment of the break.
     ///
     /// Reduced motion shows and hides the poem at once, but keeps the same

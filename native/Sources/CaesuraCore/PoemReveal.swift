@@ -41,6 +41,13 @@ public enum PoemWords {
         return result
     }
 
+    /// True when the line holds at least one word (blank lines and lines of
+    /// standalone punctuation hold none: they keep the spacing of the
+    /// stanzas but are never a reading focus).
+    public static func hasWords(in line: String) -> Bool {
+        line.contains { $0.isLetter || $0.isNumber }
+    }
+
     /// The number of words of the poem.
     public static func count(in lines: [String]) -> Int {
         words(in: lines).count
@@ -102,9 +109,10 @@ public enum PoemWords {
 
 /// What the break window shows for one session.
 ///
-/// A revealing break shows at most two original lines around the frontier; a
-/// break that shows the complete poem shows every line of it and carries no
-/// soft edge (`softEdgeLineIndex` is then `-1`).
+/// A revealing break shows the revealed text from its beginning through the
+/// frontier, cut at the frontier; a break that shows the complete poem shows
+/// every line of it and carries no soft edge (`softEdgeLineIndex` is then
+/// `-1`).
 public struct PoemRevealPreview: Equatable {
     /// The visible lines of the poem.
     public let lines: [String]
@@ -129,9 +137,10 @@ public struct PoemRevealPreview: Equatable {
 /// The progressive reveal of the poem of a break.
 ///
 /// A Mini break reveals one new word, a Long break four; the poem grows from
-/// its beginning over the breaks and stops at its end. The window keeps at
-/// most two original lines around the frontier, the last words share one soft
-/// edge. When the poem is complete, the break shows the whole poem instead.
+/// its beginning over the breaks and stops at its end. The window keeps the
+/// whole revealed text readable — every line from the first one through the
+/// frontier line — and the last words share one soft edge. When the poem is
+/// complete, the break shows the whole poem instead.
 public enum PoemReveal {
     /// Words a Mini break reveals.
     public static let miniBudget: Int = 1
@@ -172,11 +181,12 @@ public enum PoemReveal {
         revealedAfter >= totalWords ? .full : .revealing
     }
 
-    /// Cuts the poem around the frontier of the session.
+    /// Cuts the poem at the frontier of the session.
     ///
-    /// The visible window is the frontier line and the line before it, so the
-    /// window never grows into the whole poem. The visible text ends with the
-    /// last revealed word: a word that is not revealed yet never shows up.
+    /// The visible text is the revealed context: every line from the first one
+    /// through the frontier line, cut after the last revealed word. A word
+    /// that is not revealed yet never shows up, and the earlier lines stay
+    /// readable, so the poem does not jump when a new break reveals its words.
     ///
     /// The soft edge covers the last words of the revealed text — the word that
     /// this break revealed and the ones before it. It never crosses a line
@@ -206,15 +216,12 @@ public enum PoemReveal {
             bandStart += 1
         }
         let softEdgeOffset = words[bandStart].start
-        let firstLine = max(0, frontierLine - 1)
-        var visible: [String] = []
-        if firstLine < frontierLine {
-            // The lines before the frontier are completely revealed.
-            visible.append(contentsOf: session.lines[firstLine..<frontierLine])
-        }
+        // The whole revealed context stays readable: the lines before the
+        // frontier are complete, blank lines included.
+        var visible = Array(session.lines[0..<frontierLine])
         visible.append(String(session.lines[frontierLine].prefix(textEndOffset)))
         return PoemRevealPreview(lines: visible,
-                                 softEdgeLineIndex: frontierLine - firstLine,
+                                 softEdgeLineIndex: frontierLine,
                                  softEdgeOffset: softEdgeOffset,
                                  textEndOffset: textEndOffset)
     }
@@ -248,13 +255,15 @@ public struct PoemRevealSoftEdge: Equatable {
 
     /// The transparency of the fade, from its start (0) to its end (1).
     ///
-    /// The fade is gentle: the words of the band stay readable and only its
-    /// very end is really transparent. The newest word of the break has to be
-    /// recognizable at a glance, and the deep end of the edge may only be a
+    /// The fade is gentle: the band stays readable and only its very end is
+    /// really transparent. The newest word of the break has to be
+    /// recognizable at a glance — its main glyphs keep at least about three
+    /// quarters of their ink — and the deep end of the edge may only be a
     /// short distance.
     public static func alphaProfile() -> [(position: Double, alpha: Double)] {
-        // 1 - 0.92 * p³: the band stays clear for a long time and drops quickly
-        // at its very end.
-        [(0, 1.0), (0.35, 0.96), (0.6, 0.80), (0.8, 0.53), (0.92, 0.27), (1.0, 0.08)]
+        // The band stays clear for a long time, holds ~0.75 through the main
+        // glyphs of the newest word and drops quickly at its very end.
+        [(0, 1.0), (0.4, 0.97), (0.6, 0.92), (0.75, 0.86), (0.85, 0.75),
+         (0.93, 0.4), (1.0, 0.06)]
     }
 }

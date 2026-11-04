@@ -2,10 +2,17 @@ import Foundation
 
 /// Stable trial identity and non-destructive first-run profile imports.
 /// Existing destination profiles and all migration source files are preserved.
+///
+/// 2026-11-03 (authorized maintenance migration): the persistent trial now
+/// owns `~/Library/Application Support/Caesura` and the ordinary native app
+/// owns `~/Library/Application Support/CaesuraNative`. The previous native
+/// directories (`StretchlyNativeTrial`, `StretchlyNative`) are one-time import
+/// sources only; the first-run import never overwrites an existing profile
+/// and never deletes or modifies its source.
 public enum TrialSupport {
     public static let trialBundleIdentifier = "net.hovancik.stretchly.trial"
-    public static let trialDirectoryName = "StretchlyNativeTrial"
-    public static let ordinaryDirectoryName = "Caesura"
+    public static let trialDirectoryName = "Caesura"
+    public static let ordinaryDirectoryName = "CaesuraNative"
 
     /// True when the running executable belongs to the trial app: the packaged GUI app
     /// itself, or the CLI bundled inside the trial `.app`.
@@ -28,10 +35,16 @@ public enum TrialSupport {
     /// Imports a previous native profile into a new ordinary or trial installation.
     /// Isolated runs (`--data-dir`, `CAESURA_NATIVE_DATA_DIR`) never import, so a test
     /// launch of the trial bundle cannot pull the real profile into a test directory.
+    ///
+    /// The trial reads its own previous directory first (`StretchlyNativeTrial`
+    /// wins over the old ordinary `StretchlyNative`); the ordinary app only
+    /// ever imports the old ordinary profile, never the trial's.
     public static func importCompatibleProfileIfNeeded() {
         guard !AppPaths.isIsolatedRun else { return }
         let destination = AppPaths.dataDirectory()
-        let sources = isTrial ? ["StretchlyNative", ordinaryDirectoryName] : ["StretchlyNative"]
+        let sources = isTrial
+            ? ["StretchlyNativeTrial", "StretchlyNative"]
+            : ["StretchlyNative"]
         let support = destination.deletingLastPathComponent()
         for name in sources {
             if importProfile(from: support.appendingPathComponent(name), to: destination) { break }

@@ -419,6 +419,7 @@ enum RegressionTests {
         server.onArgv = { argv in
             received = argv
             expectation.signal()
+            return nil
         }
         let result = CliForwarder.forward(argvJSON: Data("{\"argv\":[\"pause\"]}".utf8), socketURL: socketURL)
         try expectEqual(result, .forwarded, "the server must still accept a complete frame")

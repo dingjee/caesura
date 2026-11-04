@@ -2,10 +2,29 @@
 # Inspects a packaged app without launching it or reading a user profile.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-APP="${1:-$ROOT/native/dist/Caesura.app}"
+APP="$ROOT/native/dist/Caesura.app"
+EXPECTED_IDENTITY=""
+# The signature identity is optional: the default check only proves that the
+# bundle is valid (and arm64-only). A bundle that was signed ad-hoc earlier
+# stays valid — the check never reads the identity of this machine, so it
+# never refuses a usable rollback.
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --expect-identity) EXPECTED_IDENTITY="${2:-}"; shift ;;
+    *) APP="$1" ;;
+  esac
+  shift
+done
+source "$ROOT/native/scripts/signing-identity.sh"
 
 plutil -lint "$APP/Contents/Info.plist"
 codesign --verify --deep --strict --verbose=1 "$APP"
+# When the caller names the identity it expects, the signature has to carry
+# it (the authority of the bundle and of both executables, their team and the
+# stable designated requirement of the identity).
+if [[ -n "$EXPECTED_IDENTITY" ]]; then
+  verify_signed_identity "$APP" "$EXPECTED_IDENTITY" || exit 1
+fi
 for key in CFBundleName CFBundleDisplayName CFBundleExecutable; do
   [[ "$(/usr/libexec/PlistBuddy -c "Print :$key" "$APP/Contents/Info.plist")" == "Caesura" ]] || {
     echo "Unexpected $key in $APP" >&2
@@ -33,11 +52,11 @@ for name in Caesura caesura-cli; do
     echo "Unexpected runtime dependency: $binary" >&2
     exit 1
   fi
-  if [[ "${CAESURA_NATIVE_UNIVERSAL:-0}" == "1" ]]; then
-    for architecture in arm64 x86_64; do
-      lipo "$binary" -verify_arch "$architecture"
-    done
-  fi
+  architectures="$(lipo -archs "$binary")"
+  [[ "$architectures" == "arm64" ]] || {
+    echo "Unexpected architectures in $binary: $architectures" >&2
+    exit 1
+  }
 done
 
 residue="$(find "$APP/Contents" \( -iname '*electron*' -o -iname '*chromium*' \

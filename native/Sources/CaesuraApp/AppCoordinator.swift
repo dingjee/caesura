@@ -47,7 +47,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
     private var lastBreak: (mini: Bool, idea: PendingIdea)?
     /// The pause of a video in fullscreen for a break: it reads the playback
     /// of the target, pauses it only when it plays, and resumes exactly it.
-    private let fullscreenVideo = FullscreenVideoController()
+    private let videoPlayback = VideoPlaybackController()
 
     private var breakSession: BreakSession?
     private var preferencesWindow: OwnedWindow?
@@ -145,6 +145,14 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
             Log.flush()
             exit(0)
         }
+
+        // The identity of this process and what macOS tells it about the
+        // accessibility permission: the log is the first place to look when
+        // a permission seems to be missing (the permission belongs to this
+        // binary — a rebuild that changes its signature asks for it again).
+        Log.info("Caesura: running as \(Bundle.main.bundleIdentifier ?? "-") "
+                 + "(\(Bundle.main.bundleURL.path))")
+        Log.info("Caesura: accessibility permission granted: \(VideoPlayback.canUseAccessibility)")
 
         Notifier.shared.configure()
         NotificationCenter.default.addObserver(forName: Notifier.openPreferencesNotification,
@@ -318,7 +326,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
             showTodaysPoem: { [weak self] in self?.createPoemWindow() },
             quit: { [weak self] in
                 // A video that was paused for a break has to play again.
-                self?.fullscreenVideo.resumeIfNeeded()
+                self?.videoPlayback.resumeIfNeeded()
                 NSApp.terminate(nil)
             },
             openDownloads: { [weak self] in self?.openExternal("https://github.com/dingjee/caesura/releases") }
@@ -408,7 +416,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
     /// it the feature cannot work, so the user is told once where to grant it.
     private func checkMediaKeyPermission() {
         guard settings.getBool("pauseFullscreenVideo") else { return }
-        guard !FullscreenVideo.canUseAccessibility else { return }
+        guard !VideoPlayback.canUseAccessibility else { return }
         Log.warn("Caesura: the accessibility permission is missing, "
                  + "a video in fullscreen cannot be paused until it is granted "
                  + "(Preferences → Breaks)")
@@ -581,17 +589,58 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
 
     private func startCliServer() -> Bool {
         cliServer.onArgv = { [weak self] argv in
+            // The status is answered right here: it only reads the state of
+            // this process, and the client waits for the answer.
+            if let answer = self?.statusAnswer(for: argv) { return answer }
             // The server delivers on a background queue; every UI action runs on the
             // main thread.
             DispatchQueue.main.async {
                 self?.handleForwardedArguments(argv)
             }
+            return nil
         }
         if !cliServer.start(socketURL: AppPaths.socketURL()) {
             Log.warn("Caesura: could not start CLI server: \(cliServer.lastError)")
             return false
         }
         return true
+    }
+
+    /// The status of this process, as JSON: the identity of the application
+    /// that is really running and what macOS tells it about the accessibility
+    /// permission.
+    ///
+    /// The command line client asks the running instance for it, so the answer
+    /// is about that process — the accessibility permission of the *client* is
+    /// a different thing and would tell nothing about the application.
+    private func statusAnswer(for argv: [String]) -> String? {
+        let command = Command(input: argv, version: AppPaths.version)
+        guard command.command == "status", command.hasSupportedCommand else { return nil }
+        // The whole snapshot is built on the main thread: the settings belong
+        // to the user interface, and the answer never races with a change in
+        // the preferences. The server never waits for the client queue, so
+        // this cannot become a circular wait.
+        var status: [String: Any] = [:]
+        DispatchQueue.main.sync { [weak self] in
+            status = [
+                "pid": ProcessInfo.processInfo.processIdentifier,
+                "version": AppPaths.version,
+                "bundleIdentifier": Bundle.main.bundleIdentifier ?? "",
+                "bundlePath": Bundle.main.bundleURL.path,
+                "executablePath": Bundle.main.executableURL?.path ?? "",
+                "accessibilityTrusted": VideoPlayback.canUseAccessibility,
+                "pauseVideoPlayback": self?.settings?.getBool("pauseFullscreenVideo") ?? false,
+            ]
+        }
+        // The answer is one line: the frame of the socket is newline
+        // terminated, so a pretty printed payload would break it.
+        guard let data = try? JSONSerialization.data(withJSONObject: status, options: [.sortedKeys]),
+              let text = String(data: data, encoding: .utf8) else { return nil }
+        Log.info("Caesura: status requested — accessibility trusted: "
+                 + "\(status["accessibilityTrusted"] ?? false), bundle: "
+                 + "\(status["bundleIdentifier"] ?? ""), executable: "
+                 + "\(status["executablePath"] ?? "")")
+        return text
     }
 
     /// Hot-plug: the break windows follow the display layout without losing the
@@ -806,7 +855,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         // The video is paused before the break covers the screen: the target
         // application is still the one in front, and its controls are read
         // while they are in the state the user left them in.
-        pauseFullscreenVideoIfNeeded()
+        pauseVideoPlaybackIfNeeded()
         session.show(screens: screenManager.targetScreens(),
                      contentScreen: screenManager.contentDisplayScreen(),
                      settings: settings)
@@ -907,7 +956,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
         // The video is paused before the break covers the screen: the target
         // application is still the one in front, and its controls are read
         // while they are in the state the user left them in.
-        pauseFullscreenVideoIfNeeded()
+        pauseVideoPlaybackIfNeeded()
         session.show(screens: screenManager.targetScreens(),
                      contentScreen: screenManager.contentDisplayScreen(),
                      settings: settings)
@@ -1119,7 +1168,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
     private func completeBreak(mini: Bool, shouldPlaySound: Bool, outcome: BreakSession.Outcome) {
         unregisterEndBreakShortcut()
         displaySleep.end()
-        fullscreenVideo.resumeIfNeeded()
+        videoPlayback.resumeIfNeeded()
         warnAboutMissingAccessibilityPermission()
         if shouldPlaySound && !settings.getBool("silentNotifications") {
             audio.play(value: settings.getString(mini ? "miniBreakAudio" : "longBreakAudio"))
@@ -1138,7 +1187,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
     /// notice on every break would only nag without helping.
     private func warnAboutMissingAccessibilityPermission() {
         guard !didWarnAboutAccessibilityPermission else { return }
-        guard !FullscreenVideo.canUseAccessibility else { return }
+        guard !VideoPlayback.canUseAccessibility else { return }
         guard settings.getBool("pauseFullscreenVideo") else { return }
         didWarnAboutAccessibilityPermission = true
         Log.info("Caesura: a video in fullscreen could not be read or paused, "
@@ -1148,12 +1197,14 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
                              openPreferences: true, autoDismissAfter: 30)
     }
 
-    /// Pauses a video that plays in fullscreen, so that the break does not
-    /// talk over it. Only a playback that could be read and confirmed is
-    /// paused, and only it is resumed when the break ends.
-    private func pauseFullscreenVideoIfNeeded() {
+    /// Pauses a video that plays, so that the break does not talk over it.
+    /// Only a playback that could be read and confirmed is paused, and only
+    /// it is resumed when the break ends.
+    private func pauseVideoPlaybackIfNeeded() {
+        // The setting keeps its old name so that an existing profile keeps
+        // its choice; it covers every video now, not only a fullscreen one.
         guard settings.getBool("pauseFullscreenVideo") else { return }
-        fullscreenVideo.pauseIfNeeded()
+        videoPlayback.pauseIfNeeded()
     }
 
     private func postponeCurrentBreak(mini: Bool) {
@@ -1420,7 +1471,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
             // Reading and pressing the controls of another application needs
             // the accessibility permission: the user is asked for it when the
             // feature is switched on.
-            FullscreenVideo.requestAccessibilityPermission()
+            VideoPlayback.requestAccessibilityPermission()
         }
         if key == "showTrayIcon" {
             settings.set("showTrayIcon", value)

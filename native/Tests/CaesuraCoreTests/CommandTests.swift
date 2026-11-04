@@ -27,8 +27,9 @@ enum CommandTests {
             try expectTrue(command.hasSupportedCommand, "command \(name) should parse")
             try expectEqual(command.command ?? "", name)
         }
-        // Legacy allCommands has exactly 14 entries.
-        try expectEqual(Command.allCommands.count, 14)
+        // The legacy allCommands had 14 entries; the status of the running
+        // instance is the fifteenth.
+        try expectEqual(Command.allCommands.count, 15)
     }
 
     static func unknownCommand() throws {

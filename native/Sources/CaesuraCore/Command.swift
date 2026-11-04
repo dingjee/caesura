@@ -37,7 +37,8 @@ public struct Command {
         "mini": CommandSpec(description: "Skip to the Mini break, customize it", options: [allOptions["title"]!, allOptions["noskip"]!, allOptions["wait"]!]),
         "long": CommandSpec(description: "Skip to the Long break, customize it", options: [allOptions["text"]!, allOptions["title"]!, allOptions["noskip"]!, allOptions["wait"]!]),
         "last": CommandSpec(description: "Start the last Mini or Long break again", options: nil),
-        "preferences": CommandSpec(description: "Open Preferences window", options: nil)
+        "preferences": CommandSpec(description: "Open Preferences window", options: nil),
+        "status": CommandSpec(description: "Show the status of the running application", options: nil)
     ]
 
     public static let examples: [(cmd: String, description: String)] = [

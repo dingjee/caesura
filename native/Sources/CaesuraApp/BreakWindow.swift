@@ -15,8 +15,20 @@ final class BreakWindow: NSWindow {
     /// the view itself), which hides the idea, the countdown and the buttons, and a
     /// nested effect view does not sample the desktop behind the window.
     private let contentContainer = NSView()
+    /// The host of the break content that carries the content mask.
+    ///
+    /// The host is NOT flipped: the content of a break is a SwiftUI hosting
+    /// view, and a flipped view would read the alpha raster upside down. The
+    /// host gives the content one coordinate system of its own — the plain,
+    /// non-flipped one of the window — so the raster of the reveal means the
+    /// same thing for the content and for the blurred material below it.
+    private let revealMaskHost = NSView()
     private var visualEffectView: NSVisualEffectView?
     private var breakContentView: NSView?
+    /// The reused alpha mask of the radial reveal on the content host
+    /// (the effect view has its own documented `maskImage`). Only its
+    /// contents change while the wave runs; it is removed when settled.
+    private var revealMaskLayer: CALayer?
 
     convenience init(screen: NSScreen, contentRect: NSRect, regularWindows: Bool, fullscreen: Bool) {
         self.init(contentRect: contentRect,
@@ -34,6 +46,13 @@ final class BreakWindow: NSWindow {
         }
         contentContainer.frame = NSRect(origin: .zero, size: contentRect.size)
         contentContainer.autoresizingMask = [.width, .height]
+        contentContainer.wantsLayer = true
+        // The host of the break content: not flipped, so the alpha raster of
+        // the reveal reads the same way in the content and in the material.
+        revealMaskHost.frame = contentContainer.bounds
+        revealMaskHost.autoresizingMask = [.width, .height]
+        revealMaskHost.wantsLayer = true
+        contentContainer.addSubview(revealMaskHost)
         contentView = contentContainer
         self.setFrame(contentRect, display: true)
         hasShadow = false
@@ -47,9 +66,9 @@ final class BreakWindow: NSWindow {
     /// The break content of the window, drawn above the blurred background.
     func setBreakContent(_ view: NSView) {
         breakContentView = view
-        view.frame = contentContainer.bounds
+        view.frame = revealMaskHost.bounds
         view.autoresizingMask = [.width, .height]
-        contentContainer.addSubview(view)
+        revealMaskHost.addSubview(view)
         // The first layout happens before the window is ordered front, so that the
         // window never shows an empty frame.
         contentContainer.layoutSubtreeIfNeeded()
@@ -73,13 +92,73 @@ final class BreakWindow: NSWindow {
         effect.state = .active
         effect.autoresizingMask = [.width, .height]
         effect.frame = contentContainer.bounds
-        if let breakContentView {
-            contentContainer.addSubview(effect, positioned: .below, relativeTo: breakContentView)
-        } else {
-            contentContainer.addSubview(effect, positioned: .below, relativeTo: nil)
-        }
+        // The material sits below the host of the break content — the two are
+        // siblings, so the content is never drawn under the material.
+        contentContainer.addSubview(effect, positioned: .below, relativeTo: revealMaskHost)
         visualEffectView = effect
         Log.info("Caesura: blurred background enabled for the break window")
+    }
+
+    /// The container the origin is converted into: everything the window
+    /// shows — the blurred material below and the break content above.
+    var revealContainer: NSView {
+        contentContainer
+    }
+
+    /// The view that actually carries the content mask: the host of the break
+    /// content only, so the material is masked solely through its own
+    /// documented `maskImage` and the two masks can never double-feather.
+    ///
+    /// The host is not flipped and shares the frame of the material, so one
+    /// origin — read in the non-flipped space of the window — describes the
+    /// same point for the backdrop and for the content.
+    var revealMaskTarget: NSView? {
+        revealMaskHost
+    }
+
+    /// The bounds the mask raster is built for (the host of the break content).
+    var revealMaskBounds: CGRect {
+        revealMaskHost.bounds
+    }
+
+    /// Applies (or, with nil, removes) the radial reveal masks for one frame.
+    ///
+    /// The material is masked through the documented `maskImage`, the only
+    /// mask that also reaches the desktop sampled behind the window; a layer
+    /// mask alone would leave that backdrop in place. The break content
+    /// carries the identical alpha mask on the layer of its own host, so the
+    /// blurred backdrop and the content reveal together, pixel for pixel.
+    ///
+    /// The layer mask sits on the host of the content and on nothing else:
+    /// masking the whole container would feather the material a second time.
+    ///
+    /// Implicit layer actions are disabled: the contents and the frame change
+    /// every frame and must never pick up a default fade animation.
+    func applyRevealMask(maskImage: NSImage?, contentImage: CGImage?) {
+        CATransaction.begin()
+        CATransaction.setValue(true, forKey: kCATransactionDisableActions)
+        visualEffectView?.maskImage = maskImage
+        if let contentImage, let host = revealMaskTarget, let layer = host.layer {
+            let maskLayer = revealMaskLayer ?? makeRevealMaskLayer()
+            maskLayer.frame = host.bounds
+            maskLayer.contents = contentImage
+            maskLayer.contentsGravity = .resize
+            layer.mask = maskLayer
+        } else {
+            revealMaskLayer = nil
+            revealMaskTarget?.layer?.mask = nil
+        }
+        CATransaction.commit()
+    }
+
+    /// The mask layer of the content: its own actions are disabled as well,
+    /// so a change of the contents can never be animated by Core Animation.
+    private func makeRevealMaskLayer() -> CALayer {
+        let maskLayer = CALayer()
+        maskLayer.actions = ["contents": NSNull(), "frame": NSNull(),
+                             "bounds": NSNull(), "position": NSNull()]
+        revealMaskLayer = maskLayer
+        return maskLayer
     }
 }
 
@@ -123,6 +202,10 @@ final class BreakSession: NSObject, NSWindowDelegate {
     private(set) var contentState: BreakWindowState?
     /// True while the break waits for a manual finish.
     private(set) var isManualAwait = false
+    /// The reveal of this break: one wave over all the windows of the break.
+    /// It is created with the pointer position of the moment and it outlives
+    /// the session when the break ends (the visual tail).
+    private var revealDriver: BreakRevealDriver?
     var onPostpone: (() -> Void)?
     var onSkip: (() -> Void)?
     var onFinish: (() -> Void)? // manual finish / automatic completion
@@ -156,6 +239,11 @@ final class BreakSession: NSObject, NSWindowDelegate {
     /// Records why the break ended.
     func end(outcome: Outcome) {
         self.outcome = outcome
+        // A cancelled break ends at once: the tail of the last break is
+        // discarded instead of running on.
+        if outcome == .cancelled {
+            BreakRevealDriver.discardPendingTail()
+        }
     }
 
     /// `screens` are the displays the break is shown on; `contentScreen` is the display
@@ -163,6 +251,9 @@ final class BreakSession: NSObject, NSWindowDelegate {
     /// the content (legacy `breakContentScreen: all`).
     func show(screens: [NSScreen], contentScreen: NSScreen?, settings: SettingsStore) {
         states = []
+        // A new break discards the tail of the last one: a stale tail must
+        // never touch the windows of this break.
+        BreakRevealDriver.discardPendingTail()
         presentWindows(screens: screens, contentScreen: contentScreen, settings: settings)
     }
 
@@ -170,6 +261,11 @@ final class BreakSession: NSObject, NSWindowDelegate {
     /// deadline, the countdown and the manual-await phase are preserved: only the
     /// windows are replaced.
     func relayout(screens: [NSScreen], contentScreen: NSScreen?, settings: SettingsStore) {
+        // The wave of the old windows is discarded at once: a rebuilt window
+        // must never be touched by a stale completion.
+        revealDriver?.cancel()
+        revealDriver = nil
+        BreakRevealDriver.discardPendingTail()
         // relayout and close overwrite the probes with the windows they discard, so
         // the lifecycle test asserts a release between the steps.
         for (index, window) in windows.enumerated() {
@@ -195,6 +291,10 @@ final class BreakSession: NSObject, NSWindowDelegate {
         let widthPercent = CGFloat(settings.getDouble("breakWindowWidth"))
         let heightPercent = CGFloat(settings.getDouble("breakWindowHeight"))
         let fullscreen = settings.getBool("fullscreen")
+        let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        // Less transparency: the break keeps an opaque, readable background and
+        // the material behind it is not used at all.
+        let reduceTransparency = NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
 
         // Legacy blanks the other screens only when the break is an overlay
         // (not a regular window) and a single content screen was selected.
@@ -203,13 +303,27 @@ final class BreakSession: NSObject, NSWindowDelegate {
         contentStates.removeAll()
         contentState = nil
 
+        // Every frame is known before the first window is shown: the wave has
+        // to reach the last corner of the last display.
+        let frames = screens.map {
+            BreakSession.bounds(for: $0, widthPercent: widthPercent,
+                                heightPercent: heightPercent, fullscreen: fullscreen)
+        }
+        // The pointer is read once: the wave has one origin for every display.
+        let pointer = NSEvent.mouseLocation
+        let driver = BreakRevealDriver(
+            origin: GlobalPoint(x: pointer.x, y: pointer.y),
+            targetFrames: frames.map {
+                GlobalRect(x: $0.origin.x, y: $0.origin.y,
+                           width: $0.size.width, height: $0.size.height)
+            },
+            reduceMotion: reduceMotion,
+            regularWindows: regularWindows)
+        revealDriver = driver
+
         for (index, screen) in screens.enumerated() {
             let isBlank = useContentScreen && screen !== contentScreen
-            let bounds = BreakSession.bounds(for: screen,
-                                             widthPercent: widthPercent,
-                                             heightPercent: heightPercent,
-                                             fullscreen: fullscreen)
-            let window = BreakWindow(screen: screen, contentRect: bounds,
+            let window = BreakWindow(screen: screen, contentRect: frames[index],
                                      regularWindows: regularWindows, fullscreen: fullscreen)
             window.delegate = self
             let state: BreakWindowState
@@ -221,6 +335,14 @@ final class BreakSession: NSObject, NSWindowDelegate {
             }
             var windowModel = model
             windowModel.blank = isBlank
+            if reduceTransparency {
+                // Less transparency: the background of the break stays opaque,
+                // so the text of the poem stays readable on it.
+                windowModel.backgroundColor =
+                    Color(hex: Utils.backgroundColor(color: model.themeColor,
+                                                     transparentMode: false, opacity: 1))
+                    ?? windowModel.backgroundColor
+            }
             let view = BreakContentView(state: isBlank ? BreakWindowState() : state,
                                         model: windowModel,
                                         onPostpone: { [weak self] in self?.onPostpone?() },
@@ -236,7 +358,10 @@ final class BreakSession: NSObject, NSWindowDelegate {
             }
             let hosting = NSHostingView(rootView: view)
             window.setBreakContent(hosting)
-            window.setBlurredBackground(settings.getBool("blurredBackground"))
+            window.setBlurredBackground(settings.getBool("blurredBackground") && !reduceTransparency)
+            // The hidden mask of the wave is applied before the window is
+            // ordered front: the first frame is never an unmasked one.
+            driver.attach(window: window, index: index)
             window.orderFrontRegardless()
             windows.append(window)
             if !isBlank {
@@ -244,6 +369,8 @@ final class BreakSession: NSObject, NSWindowDelegate {
             }
             Log.info("Caesura: showing window \(index + 1) of \(screens.count)\(isBlank ? " (blank)" : "")")
         }
+        // One wave for all the windows: it starts when the last one is in.
+        driver.startEntry()
     }
 
     static func bounds(for screen: NSScreen, widthPercent: CGFloat, heightPercent: CGFloat,
@@ -283,20 +410,53 @@ final class BreakSession: NSObject, NSWindowDelegate {
         Log.info("Caesura: entering manual finish phase (\(mini ? "Mini" : "Long") break)")
     }
 
+    /// Ends the break: the countdown and every callback stop right now. Only
+    /// the visual tail of the reveal may remain — the driver keeps the old
+    /// windows alive until its last frame and orders them out there.
     func close() {
         states.forEach { $0.stop() }
-        // relayout and close overwrite the probes with the windows they discard, so
-        // the lifecycle test asserts a release between the steps.
-        for (index, window) in windows.enumerated() {
-            onWindowDiscarded?(index, window)
-            window.delegate = nil
-            window.orderOut(nil)
-        }
-        windows.removeAll()
         states.removeAll()
         contentStates.removeAll()
         contentState = nil
         isManualAwait = false
+        // The callbacks of the session end with the session: a late timer or
+        // a late click must not reach the coordinator any more.
+        onPostpone = nil
+        onSkip = nil
+        onFinish = nil
+        onCountdownEnd = nil
+        onCloseRequested = nil
+
+        let oldWindows = windows
+        windows.removeAll()
+        // The windows do not talk to the session any more.
+        for window in oldWindows { window.delegate = nil }
+
+        let driver = revealDriver
+        revealDriver = nil
+        let discarded = onWindowDiscarded
+        onWindowDiscarded = nil
+
+        var tailStarted = false
+        if let driver, outcome != .cancelled {
+            // The tail reports the discarded windows itself, right before it
+            // orders them out.
+            driver.onWindowDiscarded = discarded
+            tailStarted = driver.beginDismissal { [oldWindows] in
+                // The tail kept the old windows alive until this frame.
+                _ = oldWindows
+            }
+        } else {
+            // A cancelled break ends at once: the wave is discarded and the
+            // windows go without a tail.
+            driver?.cancel()
+        }
+        if tailStarted { return }
+        // No tail: the windows are ordered out right away.
+        for (index, window) in oldWindows.enumerated() {
+            discarded?(index, window)
+            window.orderOut(nil)
+        }
     }
 
     var hasVisibleWindow: Bool {

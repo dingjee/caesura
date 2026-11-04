@@ -20,3 +20,7 @@ native/scripts/.poetrydb-cache/
 
 # Local Python tooling cache
 .ruff_cache/
+
+# The local signing identity of this checkout (one line: the name of the
+# certificate). It is a choice of one machine and never reaches the project.
+native/scripts/signing-identity.local

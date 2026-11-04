@@ -154,8 +154,10 @@ struct BreakContentView: View {
     ///
     /// The verses, the name of the poem and the author fade in and out as one
     /// group. Their space stays reserved while they are hidden, so the layout
-    /// of the window does not jump. The clock is not part of the poem: it stays
-    /// visible.
+    /// of the window does not jump — and the cursor can call the poem back
+    /// from the hidden area. The clock is not part of the poem: it stays
+    /// visible, and it does not hold the poem: only the cursor on the body or
+    /// on the credit does.
     @ViewBuilder
     private func poemBreakView(proxy: GeometryProxy) -> some View {
         if let session = model.poem {
@@ -164,13 +166,14 @@ struct BreakContentView: View {
                     .opacity(state.poemOpacity)
                 // The credit is not one of the verses: it stays outside the
                 // window on the body, so that it is never cut. It fades with
-                // the verses as one group: once the poem is gone, no residual
-                // line is left behind until the break ends.
+                // the verses as one group, and the cursor on it keeps the poem
+                // visible just like the cursor on the body does.
                 PoemCreditView(author: AttributedString(session.author.isEmpty ? "" : "— \(session.author)"),
                                title: AttributedString(session.title),
                                color: model.foregroundColor,
                                height: proxy.size.height)
                     .opacity(state.poemOpacity)
+                    .background(PoemHoverArea(onChange: { state.setPoemHover($0, region: .credit) }))
                 // The time, in a paragraph of its own with more room before it.
                 if model.showClock {
                     ClockView(font: BreakTypography.georgia(size: model.clockFontSize),
@@ -183,13 +186,19 @@ struct BreakContentView: View {
         }
     }
 
-    /// The poem of the break itself: the frontier window with the soft edge
-    /// while the poem grows, the whole poem once it is complete.
+    /// The poem of the break itself: the revealed text from its beginning
+    /// through the frontier, with the shared soft edge at its end while the
+    /// poem grows, the whole poem once it is complete.
     ///
-    /// The body is measured before it is drawn: it is drawn with the size of
-    /// the type scale, as long as it fits into the window on the body. A
-    /// longer body is drawn with a smaller type (never below 18 pt) and, if
-    /// it does not fit even then, it moves through the window.
+    /// The body is drawn at the size of the type scale — the comfortable size
+    /// the display gives it. A longer body is never drawn with a smaller type:
+    /// it becomes a longer scroll in the reading viewport. The reading area
+    /// starts at its end, so the newest words of the poem are the ones that
+    /// are read and the slider of the viewport stands at the bottom: a
+    /// growing poem keeps its newest words at the follow anchor of the
+    /// viewport (the revealed context above them), the complete poem shows
+    /// its last lines. Nothing travels on its own any more — only the reader
+    /// moves the poem, and the line they read is the brightest.
     @ViewBuilder
     private func poemText(session: PoemBreakSession, proxy: GeometryProxy) -> some View {
         let width = proxy.size.width * 0.9
@@ -199,7 +208,9 @@ struct BreakContentView: View {
         let budget = proxy.size.height * 0.38
         let preview = session.preview
         let lines = session.mode == .full ? session.lines : preview.lines
-        let layout = PoemBodyLayoutResolver.resolve(
+        // The type keeps its size: the length of the poem is a length of the
+        // scroll, not a smaller type.
+        let layout = PoemBodyLayoutResolver.natural(
             lines: lines,
             natural: BreakTypography.size(.body, forHeight: proxy.size.height),
             width: width,
@@ -208,76 +219,107 @@ struct BreakContentView: View {
             font: { size in
                 BreakTypography.serifFont(size: size, weight: .medium, italic: true)
             })
-        let viewport = min(layout.contentHeight, budget)
-        if session.mode == .full {
-            // The poem is complete: every line is shown, without a soft edge,
-            // and the poem travels from its beginning to its end while it is
-            // shown.
-            if state.poemOpacity > 0 {
-                TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { context in
-                    fullPoem(session: session, layout: layout, viewport: viewport,
-                             width: width, spacing: spacing,
-                             offset: poemOffset(session: session, layout: layout,
-                                                viewport: viewport, now: context.date))
-                }
+        let viewportHeight = min(layout.contentHeight, budget)
+        let mark = session.focusMark
+        let centers = layout.lineCenters(spacing: spacing)
+        let hasWords = lines.map { PoemWords.hasWords(in: $0) }
+        let font = BreakTypography.serif(size: layout.fontSize, weight: .medium, italic: true)
+        let nsFont = BreakTypography.serifFont(size: layout.fontSize, weight: .medium, italic: true)
+        // The geometry only changes with the identity of the content; the
+        // emphasis rules live in the focus controller and reach the hosted
+        // tree live — a review or an accessibility change never rebuilds the
+        // poem and never moves its scroll position.
+        let geometry = PoemFocusGeometry(
+            centers: centers,
+            hasWords: hasWords,
+            rowUnit: PoemFocus.rowUnit(heights: layout.lineHeights.map(Double.init)),
+            // The complete poem that fits the viewport reads as one.
+            uniform: session.mode == .full && !layout.overflows)
+        let contentKey = Self.poemContentKey(lines: lines, width: width,
+                                             height: proxy.size.height,
+                                             fontSize: layout.fontSize,
+                                             full: session.mode == .full)
+        let frontierCenter = mark.frontierLine >= 0 && mark.frontierLine < centers.count
+            ? centers[mark.frontierLine] : nil
+        let maxOffset = max(0, layout.contentHeight - viewportHeight)
+        // Where the reading area stands: at the end of the document, so that
+        // the slider of the viewport is at the bottom and the newest words
+        // are the ones that are read — in both modes. A growing poem keeps
+        // its frontier as the brightest line (the anchor of the focus), the
+        // complete poem reads at the position of the reader.
+        let followOffset = maxOffset
+        let followAnchorY: CGFloat? = session.mode == .full ? nil : frontierCenter
+        PoemReadingViewport(width: width,
+                            height: viewportHeight,
+                            contentHeight: layout.contentHeight,
+                            // The top only fades where the poem has actually
+                            // moved past it: the reading area starts at its
+                            // end, so the cut is the rule until the reader
+                            // scrolls back to the first line.
+                            fadesTop: layout.overflows && state.poemIsReadBelowItsFirstLine,
+                            followOffset: followOffset,
+                            // While the follow has a growing poem, the focus
+                            // locks on the frontier line: the scroll clamps
+                            // at the ends of the document, the brightest
+                            // line does not move.
+                            followAnchorY: followAnchorY,
+                            // The measured geometry of the body: the bridge
+                            // reads the focus at the reading position from
+                            // it (the top of the poem reads at its first
+                            // line, its end at its last one).
+                            geometry: geometry,
+                            userScrolled: state.poemUserScrolled,
+                            initialFraction: state.poemUserScrolled ? state.poemReaderOffset : nil,
+                            focusController: state.poemFocus,
+                            contentKey: contentKey,
+                            onHoverChanged: { state.setPoemHover($0, region: .body) },
+                            onReaderScrolled: { state.noteUserScroll($0) }) {
+            if session.mode == .full {
+                PoemBreakView(session: session,
+                              font: font,
+                              color: model.foregroundColor,
+                              spacing: spacing,
+                              geometry: geometry,
+                              focusController: state.poemFocus)
             } else {
-                fullPoem(session: session, layout: layout, viewport: viewport,
-                         width: width, spacing: spacing, offset: 0)
+                PoemRevealView(preview: preview,
+                               font: font,
+                               nsFont: nsFont,
+                               color: model.foregroundColor,
+                               width: width,
+                               spacing: spacing,
+                               geometry: geometry,
+                               focusController: state.poemFocus)
             }
-        } else {
-            // The frontier with the line before it: it stays at the bottom of
-            // the window, so that the newest words are never cut.
-            PoemRevealView(preview: preview,
-                           font: BreakTypography.serif(size: layout.fontSize,
-                                                      weight: .medium, italic: true),
-                           nsFont: BreakTypography.serifFont(size: layout.fontSize,
-                                                             weight: .medium, italic: true),
-                           color: model.foregroundColor,
-                           width: width,
-                           spacing: spacing,
-                           viewportHeight: viewport,
-                           contentHeight: layout.contentHeight,
-                           offset: max(0, layout.contentHeight - viewport),
-                           fadesTop: layout.overflows)
         }
     }
 
-    /// The whole poem of the break, at the given moment of it.
-    private func fullPoem(session: PoemBreakSession, layout: PoemBodyLayout,
-                          viewport: CGFloat, width: CGFloat, spacing: CGFloat,
-                          offset: CGFloat) -> some View {
-        PoemBreakView(session: session,
-                      font: BreakTypography.serif(size: layout.fontSize,
-                                                 weight: .medium, italic: true),
-                      color: model.foregroundColor,
-                      width: width,
-                      spacing: spacing,
-                      viewportHeight: viewport,
-                      contentHeight: layout.contentHeight,
-                      offset: offset,
-                      // The top only fades where the poem has actually moved:
-                      // a poem that fits stands still and is not masked.
-                      fadesTop: layout.overflows && offset > 0)
+    /// The identity of a poem body: the hosted poem of the reading viewport
+    /// is rebuilt only when it changes, so the focus style always reaches the
+    /// hosted tree and a settled scroll position survives the ticks in between.
+    /// The dynamic rules (following, contrast, motion) are NOT part of it:
+    /// they travel through the focus controller instead.
+    private static func poemContentKey(lines: [String], width: CGFloat, height: CGFloat,
+                                       fontSize: CGFloat, full: Bool) -> AnyHashable {
+        var hasher = Hasher()
+        hasher.combine(lines.joined(separator: "\u{0}"))
+        hasher.combine(Int(width.rounded()))
+        hasher.combine(Int(height.rounded()))
+        hasher.combine(Int(fontSize.rounded()))
+        hasher.combine(full)
+        return AnyHashable(hasher.finalize())
     }
 
-    /// How far the poem has moved at that moment: it travels from its
-    /// beginning to its end while it is shown.
-    ///
-    /// The system asks for less movement: the poem then stands still, like it
-    /// appears and disappears at once.
-    private func poemOffset(session: PoemBreakSession, layout: PoemBodyLayout,
-                            viewport: CGFloat, now: Date) -> CGFloat {
-        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return 0 }
-        let timeline = PoemTimeline.scaled(mini: session.mini, toDuration: session.durationMillis)
-        guard timeline.totalMillis > 0 else { return 0 }
-        let elapsed = Int64(now.timeIntervalSince1970 * 1000) - session.startedAt
-        // The poem arrives at its end before the hold is over and stays there:
-        // the last lines have to stay readable at the bottom while the poem is
-        // still visible, not vanish with the fade-out.
-        let travelWindow = Double(timeline.fadeInMillis + timeline.holdMillis) * 0.85
-        guard travelWindow > 0 else { return 0 }
-        let progress = min(max(Double(elapsed) / travelWindow, 0), 1)
-        return progress * max(0, layout.contentHeight - viewport)
+    /// True when the system asks for more contrast: the focus keeps its
+    /// hierarchy, but no large near-transparent text stays behind.
+    private var increaseContrast: Bool {
+        NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+    }
+
+    /// True when the system asks for less movement: the focus keeps its
+    /// hierarchy, without transition animations or glides.
+    private var reduceMotion: Bool {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
     }
 
     @ViewBuilder
@@ -406,48 +448,109 @@ struct BreakContentView: View {
 
 }
 
-/// The poem of a break: the whole poem, line by line, in the window on the
-/// body.
+/// The measured geometry of a poem body: the layout side of the reading
+/// focus. It only changes with the identity of the content (the lines, the
+/// width, the face) — it is captured when the hosted poem is built. The
+/// dynamic rules live in the focus controller, so the hosted tree reads them
+/// live without a rebuild.
+struct PoemFocusGeometry: Equatable {
+    /// The y of the centre of every line, in document coordinates.
+    let centers: [CGFloat]
+    /// True for a line that holds words (blank and punctuation-only lines
+    /// keep the spacing of the stanzas but are never a focus).
+    let hasWords: [Bool]
+    /// The height of one row of type.
+    let rowUnit: CGFloat
+    /// True when the body fits the viewport and every line is clear — the
+    /// short complete poem reads as one, without a gradient.
+    let uniform: Bool
+}
+
+extension PoemFocusGeometry {
+    /// The anchor the growing poem reads at: while the follow has it, the
+    /// frontier line is the focus — even on the very first frame, when the
+    /// reported anchor is still the controller's initial 0 and reading at
+    /// it would light the oldest verses first. Only a real review (the
+    /// reader actually scrolled, so `following` is false) reads at the
+    /// reported position, which follows the slider and the wheel; hovering
+    /// never changes it. A frontier outside the laid-out lines falls back
+    /// to the reported anchor.
+    func revealAnchorY(following: Bool, frontierLine: Int, reportedAnchorY: CGFloat) -> CGFloat {
+        guard following, frontierLine >= 0, frontierLine < centers.count else {
+            return reportedAnchorY
+        }
+        return centers[frontierLine]
+    }
+
+    /// The reading brightness of every line at the given anchor, under the
+    /// given emphasis rules.
+    func opacities(anchorY: CGFloat, emphasis: PoemFocusEmphasis) -> [Double] {
+        guard !uniform else { return centers.map { _ in 1 } }
+        return PoemFocus.opacities(centers: centers.map(Double.init),
+                                   hasWords: hasWords,
+                                   anchorY: Double(anchorY),
+                                   unitHeight: Double(rowUnit),
+                                   increaseContrast: emphasis.increaseContrast,
+                                   boostedLineOpacity: emphasis.following ? emphasis.boostedLineOpacity : nil,
+                                   boostedLines: emphasis.boostedLines)
+    }
+}
+
+/// The poem of a break: the whole poem, line by line. The reading viewport
+/// around it scrolls; this view only draws the lines — each with the
+/// brightness its reading distance gives it.
 struct PoemBreakView: View {
     let session: PoemBreakSession
     let font: Font
     let color: Color
-    /// The width the poem is laid out in.
-    let width: CGFloat
     /// The spacing between the lines of the poem.
     let spacing: CGFloat
-    /// The height of the window on the poem.
-    let viewportHeight: CGFloat
-    /// The height of the whole poem.
-    let contentHeight: CGFloat
-    /// How far the poem has moved up.
-    let offset: CGFloat
-    /// True when the poem is cut at the top of the window.
-    let fadesTop: Bool
+    /// The measured geometry of the body.
+    let geometry: PoemFocusGeometry
+    /// The focus the scroll bridge reports the reading anchor to.
+    @ObservedObject var focusController: PoemFocusController
 
     var body: some View {
-        PoemViewport(width: width,
-                     height: viewportHeight,
-                     contentHeight: contentHeight,
-                     offset: offset,
-                     fadesTop: fadesTop) {
-            VStack(spacing: spacing) {
-                ForEach(Array(session.lines.enumerated()), id: \.offset) { _, line in
-                    Text(line)
-                        .font(font)
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(color)
-                }
+        let emphasis = focusController.emphasis
+        let opacities = geometry.opacities(anchorY: focusController.anchorY, emphasis: emphasis)
+        VStack(spacing: spacing) {
+            ForEach(Array(session.lines.enumerated()), id: \.offset) { index, line in
+                PoemFocusedLine(text: line,
+                                opacity: index < opacities.count ? opacities[index] : 1,
+                                font: font, color: color,
+                                animate: emphasis.following && !emphasis.reduceMotion)
             }
         }
     }
 }
 
-/// The poem of a break while it grows: the lines around the frontier, with
-/// the shared soft edge at the end of the frontier line.
-///
-/// Only the lines around the frontier are shown: the poem of the break grows
-/// from its beginning over the breaks.
+/// One line of a poem at its reading brightness. Only the brightness moves,
+/// with a soft handover while the follow moves the focus: the size, the
+/// weight and the spacing of the type stay exactly where they are, and a
+/// review moves the brightness without any trailing animation.
+struct PoemFocusedLine: View {
+    let text: String
+    let opacity: Double
+    let font: Font
+    let color: Color
+    /// True when the handover between lines animates (the follow, without
+    /// reduced motion).
+    let animate: Bool
+
+    var body: some View {
+        Text(text)
+            .font(font)
+            .multilineTextAlignment(.center)
+            .foregroundColor(color.opacity(opacity))
+            .animation(animate ? Tween.emphasisHandover : nil, value: opacity)
+    }
+}
+
+/// The poem of a break while it grows: the revealed text from its beginning
+/// through the frontier, with the shared soft edge at the end of the frontier
+/// line. The reading viewport around it scrolls; this view only draws the
+/// lines — the frontier line is the brightest, the lines before it step back
+/// with their reading distance.
 struct PoemRevealView: View {
     let preview: PoemRevealPreview
     let font: Font
@@ -458,38 +561,39 @@ struct PoemRevealView: View {
     let width: CGFloat
     /// The spacing between the lines of the poem.
     let spacing: CGFloat
-    /// The height of the window on the poem.
-    let viewportHeight: CGFloat
-    /// The height of the whole poem.
-    let contentHeight: CGFloat
-    /// How far the poem has moved up.
-    let offset: CGFloat
-    /// True when the poem is cut at the top of the window.
-    let fadesTop: Bool
+    /// The measured geometry of the body.
+    let geometry: PoemFocusGeometry
+    /// The focus the scroll bridge reports the reading anchor to.
+    @ObservedObject var focusController: PoemFocusController
 
     var body: some View {
-        PoemViewport(width: width,
-                     height: viewportHeight,
-                     contentHeight: contentHeight,
-                     offset: offset,
-                     fadesTop: fadesTop) {
-            VStack(spacing: spacing) {
-                ForEach(Array(preview.lines.enumerated()), id: \.offset) { index, line in
-                    if index == preview.softEdgeLineIndex {
-                        SoftEdgePoemLine(text: line,
-                                         edgeOffset: preview.softEdgeOffset,
-                                         font: font,
-                                         nsFont: nsFont,
-                                         color: color,
-                                         availableWidth: width)
-                    } else {
-                        // The lines before the frontier are fully revealed: they
-                        // stay clear, without a soft edge.
-                        Text(line)
-                            .font(font)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(color)
-                    }
+        let emphasis = focusController.emphasis
+        // The growing poem reads at its frontier while the follow has it:
+        // the first frame is already bright at the newest words, whatever
+        // the reported anchor is; only a real review reads at the position
+        // the bridge reported.
+        let anchorY = geometry.revealAnchorY(following: emphasis.following,
+                                             frontierLine: preview.softEdgeLineIndex,
+                                             reportedAnchorY: focusController.anchorY)
+        let opacities = geometry.opacities(anchorY: anchorY, emphasis: emphasis)
+        VStack(spacing: spacing) {
+            ForEach(Array(preview.lines.enumerated()), id: \.offset) { index, line in
+                if index == preview.softEdgeLineIndex {
+                    SoftEdgePoemLine(text: line,
+                                     edgeOffset: preview.softEdgeOffset,
+                                     font: font,
+                                     nsFont: nsFont,
+                                     color: color,
+                                     lineOpacity: index < opacities.count ? opacities[index] : 1,
+                                     availableWidth: width,
+                                     animate: emphasis.following && !emphasis.reduceMotion)
+                } else {
+                    // The lines before the frontier are fully revealed: they
+                    // carry no soft edge, only their reading brightness.
+                    PoemFocusedLine(text: line,
+                                    opacity: index < opacities.count ? opacities[index] : 1,
+                                    font: font, color: color,
+                                    animate: emphasis.following && !emphasis.reduceMotion)
                 }
             }
         }
@@ -533,7 +637,9 @@ enum PoemSoftEdgeGeometry {
 /// The edge is ONE continuous, slanted fade over the words at the end of the
 /// revealed text — not a gradient per word, and not a fade over the whole
 /// width of the window. Its position comes from the real geometry of the line:
-/// the width the text needs and the width of the part before the edge.
+/// the width the text needs and the width of the part before the edge. The
+/// line itself sits at its reading brightness: the frontier is the focus, so
+/// its line keeps the full brightness and only the soft edge shapes its tail.
 struct SoftEdgePoemLine: View {
     let text: String
     /// The character offset where the soft edge starts (the first character of
@@ -543,16 +649,22 @@ struct SoftEdgePoemLine: View {
     /// The same face as `font`, measured with CoreText.
     let nsFont: NSFont
     let color: Color
+    /// The reading brightness of the line.
+    let lineOpacity: Double
     /// The width the line is laid out in.
     let availableWidth: CGFloat
+    /// True when the handover between lines animates (the follow, without
+    /// reduced motion).
+    let animate: Bool
 
     var body: some View {
         Text(text)
             .font(font)
             .multilineTextAlignment(.center)
-            .foregroundColor(color)
+            .foregroundColor(color.opacity(lineOpacity))
             .frame(maxWidth: .infinity)
             .mask(edgeMask)
+            .animation(animate ? Tween.emphasisHandover : nil, value: lineOpacity)
     }
 
     /// The mask of the line: clear until the soft edge, then one slanted fade
@@ -612,11 +724,21 @@ struct PoemCreditView: View {
     }
 }
 
+/// The areas of the poem whose cursor keeps it visible: the body and the
+/// credit report separately, and the poem stays visible while the cursor is
+/// on either of them. The clock and the rest of the window are not areas.
+enum PoemHoverRegion: Hashable {
+    case body
+    case credit
+}
+
 /// 100 ms tick, mirroring the legacy renderer interval.
 final class BreakWindowState: ObservableObject {
     @Published var progressFraction: Double = 1
     /// The opacity of the poem of the break: it fades in, waits and fades
-    /// out again, and stays hidden until the break ends.
+    /// out again, and stays hidden until the break ends. While the cursor
+    /// rests on the body or the credit of the poem, the poem stays visible
+    /// as one group.
     @Published var poemOpacity: Double = 0
     @Published var manualAwait = false
     @Published var canPostpone = false
@@ -628,10 +750,47 @@ final class BreakWindowState: ObservableObject {
     var onCountdownEnd: (() -> Void)?
     /// The time envelope of the poem of this break.
     private var poemTimeline: PoemTimeline?
-    /// The refresh of the poem of this break. It stops when the poem is gone.
+    /// The refresh of the poem of this break. It stops when the break ends.
     private var poemTimer: Timer?
-    /// True when the poem of this break has faded out for good.
+    /// True when the poem of this break is gone for good: the break reached
+    /// its captured duration, and no hover may call it back.
     private var poemFinished = false
+    /// The poem session the reading state belongs to. A rebuilt window (a
+    /// display change) starts the same session again and the reading state
+    /// survives it; a new break starts a new session and hides the old poem.
+    private var poemSession: PoemBreakSession?
+    /// The poem areas the cursor is on. Aggregating the areas keeps the leave
+    /// of one area from cancelling the enter of the other when the cursor
+    /// moves between the body and the credit.
+    private var poemHoverRegions: Set<PoemHoverRegion> = []
+    /// When the cursor last left all poem areas (nil while it never was on
+    /// the poem).
+    private var hoverLeftAt: Int64?
+    /// When the entry tween of the hover began (nil while none runs): a
+    /// hover that calls a hidden or partly faded poem back eases it in over
+    /// the shared token instead of snapping it to full opacity.
+    private var poemEntryBeganAt: Int64?
+    /// The alpha the poem showed when that tween began.
+    private var poemEntrySeed: Double = 1
+    /// The alpha the poem had reached when the cursor last left all of its
+    /// areas: the leave fade decays from there, so a leave during the entry
+    /// never flashes the poem to full opacity.
+    private var poemLeaveSeedAlpha: Double = 1
+    /// True once the reader scrolled in the poem themselves: the poem stays
+    /// where they put it — the follow keeps its hands off from then on.
+    @Published var poemUserScrolled = false
+    /// The reading position the reader scrolled to (0 at the top, 1 at the
+    /// newest words): a rebuilt window restores it.
+    @Published var poemReaderOffset: Double = 1
+    /// The reading focus shared with the viewport bridge: the bridge reports
+    /// the reading anchor, the lines read it.
+    let poemFocus = PoemFocusController()
+    /// True while the poem is read below its first line: the reading area
+    /// starts at the end of the poem, so the cut at the top is the rule until
+    /// the reader scrolls back to the very first line.
+    var poemIsReadBelowItsFirstLine: Bool {
+        !poemUserScrolled || poemReaderOffset > 0
+    }
 
     func start(model: BreakContentView.Model) {
         modelRef = model
@@ -656,37 +815,197 @@ final class BreakWindowState: ObservableObject {
     ///
     /// The timeline is measured from the captured start of the break, so a
     /// window that is rebuilt (a display change) continues the same animation
-    /// instead of playing it again, and a poem that has already faded out stays
-    /// hidden.
+    /// instead of playing it again, and a poem that is gone for good stays
+    /// hidden. The envelope of the complete poem grows with the amount of
+    /// text (its reading time), capped by the break.
+    ///
+    /// When the same captured session starts again, the reading state (the
+    /// cursor on the poem, the reading position) survives the rebuild; a new
+    /// session hides the old poem and starts from the beginning.
     private func startPoem(model: BreakContentView.Model) {
+        let samePoem = model.poem != nil && model.poem == poemSession
         poemTimer?.invalidate()
         poemTimer = nil
         poemTimeline = nil
         poemFinished = false
-        poemOpacity = 0
-        guard let session = model.poem else { return }
-        let timeline = PoemTimeline.scaled(mini: session.mini, toDuration: model.duration)
+        if !samePoem {
+            poemOpacity = 0
+            poemUserScrolled = false
+            poemReaderOffset = 1
+            poemHoverRegions = []
+            hoverLeftAt = nil
+            poemEntryBeganAt = nil
+            poemEntrySeed = 1
+            poemLeaveSeedAlpha = 1
+        }
+        guard let session = model.poem else {
+            poemSession = nil
+            return
+        }
+        poemSession = session
+        let timeline: PoemTimeline
+        if session.mode == .full {
+            timeline = PoemTimeline.full(mini: session.mini, toDuration: model.duration,
+                                         wordCount: session.totalWords)
+        } else {
+            timeline = PoemTimeline.scaled(mini: session.mini, toDuration: model.duration)
+        }
         poemTimeline = timeline
+        syncPoemFocusEmphasis()
         guard timeline.totalMillis > 0 else { return }
-        updatePoemOpacity()
-        guard !poemFinished else { return }
+        updatePoem()
+        // The poem becomes visible right away: the refresh starts now and
+        // stops by itself once nothing changes any more.
+        ensurePoemTimer()
+    }
+
+    /// The cursor entered or left one poem area (the body or the credit).
+    ///
+    /// The poem stays visible while the cursor rests on any of its areas and
+    /// fades out softly after it left all of them. The cursor is retention
+    /// only: it never moves the poem, never changes the reading position and
+    /// never changes which line is the brightest. The areas are aggregated,
+    /// so moving between the body and the credit keeps the poem visible no
+    /// matter in which order the enter and leave events arrive.
+    func setPoemHover(_ active: Bool, region: PoemHoverRegion) {
+        guard let model = modelRef, model.poem != nil else { return }
+        let now = SystemClock().nowMillis
+        if active {
+            guard !poemHoverRegions.contains(region) else { return }
+            poemHoverRegions.insert(region)
+            if poemHoverRegions.count == 1 {
+                hoverLeftAt = nil
+                // A hover that calls a hidden or partly faded poem back
+                // eases it in from the alpha on screen right now instead of
+                // snapping it to full opacity. Reduced motion restores at
+                // once, and a poem already at full strength needs no tween.
+                // The union only transitions once per rest on the poem, so
+                // moving between the body and the credit never restarts it.
+                if !reduceMotion, poemOpacity < 1 {
+                    poemEntryBeganAt = now
+                    poemEntrySeed = poemOpacity
+                }
+            }
+        } else {
+            guard poemHoverRegions.contains(region) else { return }
+            poemHoverRegions.remove(region)
+            if poemHoverRegions.isEmpty {
+                hoverLeftAt = now
+                // The leave fade decays from the alpha the poem has reached
+                // at this moment: a leave during the entry continues from
+                // where the ease stood, never flashing to full opacity.
+                poemLeaveSeedAlpha = poemOpacity
+                poemEntryBeganAt = nil
+            }
+        }
+        updatePoem()
+    }
+
+    /// The reader scrolled in the poem themselves — with the wheel, the
+    /// trackpad, the slider, the track or the keyboard; the bridge reports
+    /// every one of them through the bounds of the clip view. The poem stays
+    /// where they put it: the follow keeps its hands off from then on, so a
+    /// reader is never dragged back to a position the clock has computed. The
+    /// reading position is kept, so a rebuilt window restores it.
+    func noteUserScroll(_ offset: Double) {
+        if !poemUserScrolled {
+            poemUserScrolled = true
+        }
+        if poemReaderOffset != offset {
+            poemReaderOffset = offset
+        }
+        syncPoemFocusEmphasis()
+    }
+
+    /// The emphasis rules of the focus, synced into the controller whenever
+    /// the reading state or the accessibility settings change. It publishes
+    /// only a real change and only outside view updates (the timers and the
+    /// event handlers call this) — the hosted poem reads the rules live,
+    /// without a rebuild and without a scroll reset.
+    private func syncPoemFocusEmphasis() {
+        guard let session = modelRef?.poem else { return }
+        let mark = session.focusMark
+        let emphasis = PoemFocusEmphasis(
+            following: !poemUserScrolled,
+            increaseContrast: NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast,
+            reduceMotion: reduceMotion,
+            boostedLineOpacity: mark.secondaryLines.isEmpty ? nil : PoemFocus.newWordLineOpacity,
+            boostedLines: mark.secondaryLines)
+        if poemFocus.emphasis != emphasis {
+            poemFocus.emphasis = emphasis
+        }
+    }
+
+    /// The high-frequency refresh of the poem. It is started when the poem
+    /// can change and stops by itself when nothing changes any more: a
+    /// hidden poem is woken by the hover events, and the break deadline is
+    /// covered by the low-frequency tick of the break.
+    private func ensurePoemTimer() {
+        guard poemTimer == nil else { return }
         let timer = Timer.scheduledTimer(withTimeInterval: 0.04, repeats: true) { [weak self] _ in
-            self?.updatePoemOpacity()
+            self?.updatePoem()
         }
         RunLoop.main.add(timer, forMode: .common)
         poemTimer = timer
     }
 
-    private func updatePoemOpacity() {
-        guard let timeline = poemTimeline, let model = modelRef, !poemFinished else { return }
-        let elapsed = SystemClock().nowMillis - model.started
-        poemOpacity = timeline.opacity(at: elapsed, reduceMotion: reduceMotion)
-        if elapsed >= timeline.totalMillis {
-            // The poem is gone: no refresh for a hidden poem.
+    private func updatePoem() {
+        guard let timeline = poemTimeline, let model = modelRef, model.poem != nil else { return }
+        let now = SystemClock().nowMillis
+        let elapsed = now - model.started
+        if elapsed >= model.duration {
+            // The break reached its captured duration: the poem is gone for
+            // good, hovered or not — no refresh is needed any more. The review
+            // ends with it: a poem that can never come back has no reading
+            // position to keep.
             poemFinished = true
+            publish(poemOpacity: 0)
+            poemEntryBeganAt = nil
+            if poemUserScrolled {
+                poemUserScrolled = false
+            }
+            poemTimer?.invalidate()
+            poemTimer = nil
+            return
+        }
+        let sinceLeft = hoverLeftAt.map { now - $0 }
+        let entry = poemEntryBeganAt.map {
+            PoemRetention.Entry(seedAlpha: poemEntrySeed,
+                                millisSinceBegan: max(0, now - $0))
+        }
+        publish(poemOpacity: PoemRetention.opacity(timeline: timeline,
+                                                   elapsedMillis: elapsed,
+                                                   breakDurationMillis: model.duration,
+                                                   hovering: poemHover,
+                                                   millisSinceLeft: sinceLeft,
+                                                   reduceMotion: reduceMotion,
+                                                   entry: entry,
+                                                   leaveSeedAlpha: poemLeaveSeedAlpha))
+        syncPoemFocusEmphasis()
+        // The refresh runs while the poem can still change: while it is
+        // visible, or while an entry tween eases a hovered poem back in —
+        // that one begins at the alpha it starts from, possibly zero, so it
+        // alone has to keep the refresh alive until it has advanced past its
+        // first step.
+        if poemOpacity > 0 || poemEntryBeganAt != nil {
+            ensurePoemTimer()
+        } else {
             poemTimer?.invalidate()
             poemTimer = nil
         }
+    }
+
+    /// A property that is published only when it really changes: the refresh
+    /// of the poem never wakes the window for the same value again.
+    private func publish(poemOpacity newValue: Double) {
+        if poemOpacity != newValue {
+            poemOpacity = newValue
+        }
+    }
+
+    /// True while the cursor rests on any poem area.
+    private var poemHover: Bool {
+        !poemHoverRegions.isEmpty
     }
 
     /// The system asks for less movement: the poem then appears and disappears
@@ -706,6 +1025,7 @@ final class BreakWindowState: ObservableObject {
 
     private func tick() {
         guard let model = modelRef else { return }
+        updatePoem()
         let now = Int64(Date().timeIntervalSince1970 * 1000)
         let passed = now - model.started
         if !manualAwait {

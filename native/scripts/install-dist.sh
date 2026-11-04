@@ -23,6 +23,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ROOT_REAL="$(cd "$ROOT" && pwd -P)"
+# The identity of the signature: the very same one that package-app.sh used.
+# The trial is never re-signed ad-hoc behind the back of the build.
+source "$ROOT/native/scripts/signing-identity.sh"
 APP_NAME="Caesura"
 TRIAL_ID="net.hovancik.stretchly.trial"
 DIST="$ROOT/dist"
@@ -115,7 +118,7 @@ if [[ $DRY_RUN -eq 1 ]]; then
   echo "== install-dist.sh (dry run) — nothing is built or touched =="
   echo "[dry-run] stage: mktemp -d \"${TMPDIR:-/tmp}/$STAGE_PREFIX-XXXXXX\" + $MARKER=$ROOT_REAL"
   echo "[dry-run] build+stage: native/scripts/package-app.sh <stage> (release build, bundle layout, icon, Info.plist, PkgInfo, ad-hoc sign; DEVELOPER_DIR handled inside)"
-  echo "[dry-run] identity: plutil -replace CFBundleIdentifier=$TRIAL_ID, CFBundleName/CFBundleDisplayName=$APP_NAME; codesign --force --deep --sign -"
+  echo "[dry-run] identity: plutil -replace CFBundleIdentifier=$TRIAL_ID, CFBundleName/CFBundleDisplayName=$APP_NAME; codesign with the identity of the build (ad-hoc when none is configured)"
   echo "[dry-run] verify staged bundle: plutil -lint, Caesura + caesura-cli executable, resource bundle, codesign --verify"
   echo "[dry-run] verify staged binary: CAESURA_NATIVE_DATA_DIR=<stage>/selfcheck <stage>/$APP_NAME.app/Contents/MacOS/Caesura version → 'Caesura version …', exit 0"
   echo "[dry-run] stop: SIGTERM to pids of exactly $PREVIOUS_PROCESS_BIN (wait up to 10s; abort and leave the old trial if it survives)"
@@ -172,8 +175,8 @@ PLIST="$STAGED/Contents/Info.plist"
 plutil -replace CFBundleIdentifier -string "$TRIAL_ID" "$PLIST"
 plutil -replace CFBundleName -string "$APP_NAME" "$PLIST"
 plutil -replace CFBundleDisplayName -string "$APP_NAME" "$PLIST"
-echo "== re-signing $STAGED =="
-codesign --force --deep --sign - "$STAGED"
+echo "== signing $STAGED with the identity of the build =="
+sign_bundle "$STAGED"
 
 echo "== verifying the staged bundle (the existing trial is not touched yet) =="
 if ! verify_bundle "$STAGED"; then

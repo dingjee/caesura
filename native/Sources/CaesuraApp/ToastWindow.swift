@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import CaesuraCore
 
 /// A short-lived toast under the menu bar item: it points at the icon and says
 /// that Caesura is running. It is the whole first-run experience — the app
@@ -50,8 +51,7 @@ final class ToastWindow: NSPanel {
 
         alphaValue = 0
         orderFrontRegardless()
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25
+        Tween.appKit(TransitionTokens.smallFeedbackMillis, .entering) { _ in
             self.animator().alphaValue = 1
         }
         dismissTimer?.invalidate()
@@ -64,13 +64,12 @@ final class ToastWindow: NSPanel {
     func dismiss() {
         dismissTimer?.invalidate()
         dismissTimer = nil
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.3
+        Tween.appKit(TransitionTokens.smallFeedbackDismissMillis, .exiting, { _ in
             self.animator().alphaValue = 0
-        } completionHandler: { [weak self] in
+        }, completion: { [weak self] in
             self?.orderOut(nil)
             self?.close()
-        }
+        })
     }
 }
 

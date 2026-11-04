@@ -5,18 +5,21 @@
 # - .app bundle with Info.plist (LSUIElement, LSMinimumSystemVersion 13.0, icon, 1.22.1)
 # - SPM resource bundle (locales + audio) into Contents/Resources
 # - .icns rendered natively from the Caesura mark with AppKit + iconutil
-# - ad-hoc codesign (no identity required)
-# Set CAESURA_NATIVE_UNIVERSAL=1 to build for Apple Silicon and Intel.
+# - codesign with the identity of native/scripts/signing-identity.sh
+#   (CAESURA_NATIVE_SIGN_IDENTITY, or the git-ignored local identity file);
+#   ad-hoc when neither is set
+# Releases support Apple Silicon only (CAESURA_NATIVE_UNIVERSAL=0).
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 OUT_DIR="${1:-$ROOT/native/dist}"
 CONFIG="release"
 if [[ "${2:-}" == "--dev" ]]; then CONFIG="debug"; fi
-BUILD_ARGS=(-c "$CONFIG")
 if [[ "${CAESURA_NATIVE_UNIVERSAL:-0}" == "1" ]]; then
-  BUILD_ARGS+=(--arch arm64 --arch x86_64)
+  echo "Universal releases are no longer supported; use CAESURA_NATIVE_UNIVERSAL=0." >&2
+  exit 2
 fi
+BUILD_ARGS=(-c "$CONFIG" --arch arm64)
 
 # The Command Line Tools of this host ship a SwiftUI macro plugin that is missing, so
 # the build uses the installed Xcode toolchain. The selection is process scoped: the
@@ -25,6 +28,10 @@ if [[ -z "${DEVELOPER_DIR:-}" && -d /Applications/Xcode.app/Contents/Developer ]
   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
   echo "== using DEVELOPER_DIR=$DEVELOPER_DIR =="
 fi
+
+# The identity of the signature: the same one that install-dist.sh uses, so
+# the installed bundle is never signed ad-hoc behind the back of the build.
+source "$ROOT/native/scripts/signing-identity.sh"
 
 APP_NAME="Caesura"
 BUNDLE_ID="io.github.dingjee.caesura"
@@ -109,10 +116,20 @@ PLIST
 # PkgInfo
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
-echo "== ad-hoc codesign =="
-codesign --force --deep --sign - "$APP"
+sign_bundle "$APP"
 
 echo "== verification =="
-"$ROOT/native/scripts/verify-app.sh" "$APP"
+SIGN_IDENTITY="$(resolve_sign_identity)"
+if [[ -n "$SIGN_IDENTITY" ]]; then
+  # The bundle that is built has to carry the identity of this checkout —
+  # an ad-hoc signature would ask for the accessibility permission again.
+  verify_signed_identity "$APP" "$SIGN_IDENTITY" || {
+    echo "the bundle does not carry the expected identity: $SIGN_IDENTITY" >&2
+    exit 1
+  }
+  "$ROOT/native/scripts/verify-app.sh" "$APP" --expect-identity "$SIGN_IDENTITY"
+else
+  "$ROOT/native/scripts/verify-app.sh" "$APP"
+fi
 
 echo "Packaged: $APP"

@@ -10,7 +10,7 @@ final class PreferencesController: ObservableObject {
     /// True when macOS lets the app read and press the controls of another
     /// application. The permission is granted in the system settings, so the
     /// state can change while the app is in the background.
-    @Published var accessibilityAllowed = FullscreenVideo.canUseAccessibility
+    @Published var accessibilityAllowed = VideoPlayback.canUseAccessibility
 
     init(localization: Localization, settings: SettingsStore, coordinator: AppCoordinator) {
         self.localization = localization
@@ -27,7 +27,7 @@ final class PreferencesController: ObservableObject {
     /// Reads the permission again: the user may have granted it in the system
     /// settings in the meantime.
     func refreshAccessibilityState() {
-        let allowed = FullscreenVideo.canUseAccessibility
+        let allowed = VideoPlayback.canUseAccessibility
         guard allowed != accessibilityAllowed else { return }
         accessibilityAllowed = allowed
         Log.info("Caesura: the accessibility permission was granted")
@@ -360,7 +360,7 @@ struct PreferencesView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 Button(t("preferences.schedule.grantMediaKeyPermission")) {
-                    FullscreenVideo.requestAccessibilityPermission()
+                    VideoPlayback.requestAccessibilityPermission()
                 }
             }
         }

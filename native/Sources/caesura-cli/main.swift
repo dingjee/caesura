@@ -44,6 +44,36 @@ guard command.hasSupportedCommand else {
 let payload: [String: Any] = ["argv": args]
 guard let data = try? JSONSerialization.data(withJSONObject: payload) else { exit(3) }
 
+// The status is answered by the running instance: the client asks the
+// process that is really running, so the answer is about that process (its
+// accessibility permission, its bundle) and not about the client.
+if command.command == "status" {
+    let (result, answer) = CliForwarder.request(argvJSON: data,
+                                                socketURL: AppPaths.socketURL(dataDirectory: dataDirOverride))
+    switch result {
+    case .forwarded:
+        guard let answer else {
+            FileHandle.standardError.write("Caesura: the running instance did not answer the status request\n".data(using: .utf8)!)
+            exit(6)
+        }
+        if let object = try? JSONSerialization.jsonObject(with: Data(answer.utf8)) as? [String: Any] {
+            for key in object.keys.sorted() {
+                let value = object[key] ?? ""
+                print("\(key): \(value)")
+            }
+        } else {
+            print(answer)
+        }
+        exit(0)
+    case .noInstance:
+        FileHandle.standardError.write("Caesura: no running native instance found at \(AppPaths.socketURL(dataDirectory: dataDirOverride).path)\n".data(using: .utf8)!)
+        exit(4)
+    case .failed(let message):
+        FileHandle.standardError.write(("Caesura: forwarding failed: \(message)\n").data(using: .utf8)!)
+        exit(5)
+    }
+}
+
 let result = CliForwarder.forward(argvJSON: data, socketURL: AppPaths.socketURL(dataDirectory: dataDirOverride))
 switch result {
 case .forwarded:

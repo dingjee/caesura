@@ -14,10 +14,12 @@ public enum CoreResources {
     }
 }
 
-/// Paths for the native app. Native data lives in `~/Library/Application Support/Caesura`
-/// by default and can be isolated (smoke tests) with `CAESURA_NATIVE_DATA_DIR` or
-/// `--data-dir <path>` as the first argument. The legacy Electron directory is only ever read
-/// (one-time import) and never written.
+/// Paths for the native app. The persistent trial lives in
+/// `~/Library/Application Support/Caesura`, the ordinary native app in
+/// `~/Library/Application Support/CaesuraNative`; both can be isolated (smoke
+/// tests) with `CAESURA_NATIVE_DATA_DIR` or `--data-dir <path>` as the first
+/// argument. The legacy Electron directory is only ever read (one-time
+/// import) and never written.
 public enum AppPaths {
     public static var dataDirectoryOverride: URL?
 

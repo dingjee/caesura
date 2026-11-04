@@ -17,20 +17,20 @@ jobs:
   package:
     runs-on: macos-latest
     env:
-      CAESURA_NATIVE_UNIVERSAL: '1'
+      CAESURA_NATIVE_UNIVERSAL: '0'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           ref: ${{ inputs.pr_number && format('refs/pull/{0}/head', inputs.pr_number) || github.ref }}
-      - name: Package and verify Apple Silicon and Intel app
+      - name: Package and verify Apple Silicon app
         run: native/scripts/package-app.sh
       - name: Archive signed app
-        run: ditto -c -k --sequesterRsrc --keepParent native/dist/Caesura.app native/dist/Caesura-macOS-universal.zip
+        run: ditto -c -k --sequesterRsrc --keepParent native/dist/Caesura.app native/dist/Caesura-macOS-arm64.zip
       - name: Upload native app
         uses: actions/upload-artifact@v6
         with:
-          name: caesura-macOS-universal-${{ github.run_id }}
-          path: native/dist/Caesura-macOS-universal.zip
+          name: caesura-macOS-arm64-${{ github.run_id }}
+          path: native/dist/Caesura-macOS-arm64.zip
           if-no-files-found: error
           retention-days: 30

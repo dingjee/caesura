@@ -9,11 +9,12 @@ enum PoemRevealTests {
         TestRunner.register("poem reveal: a mini reveals one word, a long break four", revealBudgets)
         TestRunner.register("poem reveal: the reveal stops at the end of the poem", revealStopsAtTheEnd)
         TestRunner.register("poem reveal: the revealed position is clamped into the poem", revealClampsPosition)
-        TestRunner.register("poem reveal: the preview keeps two lines and cuts at the frontier", previewWindow)
+        TestRunner.register("poem reveal: the preview keeps the revealed context and cuts at the frontier", previewWindow)
         TestRunner.register("poem reveal: the preview never shows a word that is not revealed", previewShowsOnlyRevealedWords)
         TestRunner.register("poem reveal: the soft edge covers the last revealed words", previewSoftEdgeCoversTheRevealedTail)
         TestRunner.register("poem reveal: the soft edge band never crosses a line boundary", previewBandStopsAtTheLineEnd)
         TestRunner.register("poem reveal: the line before the frontier stays complete", previewKeepsCompleteLines)
+        TestRunner.register("poem reveal: the revealed context survives across blank lines", previewKeepsTheWholeRevealedContext)
         TestRunner.register("poem reveal: an empty poem previews nothing", previewEmptyPoem)
         TestRunner.register("poem reveal: the complete poem is shown without a soft edge", previewCompletePoem)
         TestRunner.register("poem reveal: the soft edge is one slanted band", softEdgeAxis)
@@ -198,7 +199,7 @@ enum PoemRevealTests {
         let poem = makePoem(lines: twoLines)
         // Seven revealed words: the frontier sits on the second line.
         let preview = revealing(poem, mini: true, revealedBefore: 6).preview
-        try expectEqual(preview.lines.count, 2, "at most two original lines are kept")
+        try expectEqual(preview.lines.count, 2, "the revealed context starts at the first line")
         try expectEqual(preview.lines[0], "Hope is the thing with feathers",
                         "the line before the frontier stays complete")
         try expectEqual(preview.lines[1], "That")
@@ -211,6 +212,36 @@ enum PoemRevealTests {
         try expectEqual(deeper.lines[1], "That perches in")
         try expectEqual(deeper.softEdgeOffset, 0, "the soft edge starts at 'That'")
         try expectEqual(deeper.textEndOffset, 15, "the text ends after 'in'")
+    }
+
+    /// The revealed context stays readable from the beginning: earlier lines
+    /// and the blank lines between the stanzas survive, and nothing beyond the
+    /// frontier shows up.
+    static func previewKeepsTheWholeRevealedContext() throws {
+        let poem = makePoem(lines: ["one two three four",
+                                    "",
+                                    "five six seven eight nine ten",
+                                    "eleven twelve"])
+        // Ten revealed words: the frontier sits on the third line, after 'ten'.
+        let preview = revealing(poem, mini: true, revealedBefore: 9).preview
+        try expectEqual(preview.lines.count, 3, "the first stanza and the blank line stay")
+        try expectEqual(preview.lines[0], "one two three four",
+                        "the first line stays complete")
+        try expectEqual(preview.lines[1], "", "the blank line between the stanzas stays")
+        try expectEqual(preview.lines[2], "five six seven eight nine ten")
+        try expectEqual(preview.softEdgeLineIndex, 2, "the soft edge sits on the frontier line")
+        try expectEqual(preview.softEdgeOffset, 15, "the soft edge starts at 'eight'")
+        try expectEqual(preview.textEndOffset, 29, "the text ends after 'ten'")
+        // The fourth line does not show up.
+        try expectTrue(!preview.lines.contains("eleven"),
+                       "a word that is not revealed yet never shows up")
+        // A deeper frontier on the last line keeps the whole context. (With
+        // one more word the poem would be complete and shown without a soft
+        // edge — that is the unlocking break, not a frontier.)
+        let deeper = revealing(poem, mini: true, revealedBefore: 10).preview
+        try expectEqual(deeper.lines.count, 4)
+        try expectEqual(deeper.lines[3], "eleven")
+        try expectEqual(deeper.softEdgeLineIndex, 3)
     }
 
     /// A poem without words has nothing to reveal: it is shown as it is.
@@ -268,6 +299,12 @@ enum PoemRevealTests {
         try expectTrue((profile.last?.alpha ?? 1) < 0.2, "the end of the edge is transparent")
         let atSixty = profile.first { $0.position >= 0.6 }?.alpha ?? 0
         try expectTrue(atSixty > 0.7, "the newest word has to stay readable, got \(atSixty)")
+        // The main glyphs of the newest word keep about three quarters of
+        // their ink; only a short decorative tail goes really transparent.
+        for stop in profile where stop.position <= 0.85 {
+            try expectTrue(stop.alpha >= 0.75,
+                           "the main glyphs stay readable, got \(stop.alpha) at \(stop.position)")
+        }
         var previous = 1.0
         for stop in profile {
             try expectTrue(stop.alpha <= previous, "the profile never gets brighter")

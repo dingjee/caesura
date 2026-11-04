@@ -6,7 +6,10 @@ public final class CliServer {
     /// `lastError` value when the socket is already owned by a running instance.
     public static let errorSocketOwned = "socket owned by another instance"
 
-    public var onArgv: (([String]) -> Void)?
+    /// Called for every received frame. The handler may return an answer: it
+    /// is written back to the client as one newline-terminated frame (the
+    /// status of the running instance, for example).
+    public var onArgv: (([String]) -> String?)?
     public private(set) var lastError: String = ""
     private var listenFD: Int32 = -1
     private var acceptSource: DispatchSourceRead?
@@ -111,7 +114,29 @@ public final class CliServer {
         stop()
     }
 
+    /// Writes a frame as a whole: a partial write is continued, an error ends
+    /// it. A client that is gone is not an error of the application.
+    private func writeAll(_ fd: Int32, _ data: Data) {
+        let bytes = [UInt8](data)
+        var sent = 0
+        while sent < bytes.count {
+            let written = bytes.withUnsafeBytes { raw -> Int in
+                write(fd, raw.baseAddress!.advanced(by: sent), bytes.count - sent)
+            }
+            if written > 0 {
+                sent += written
+                continue
+            }
+            if written < 0 && errno == EINTR { continue }
+            return
+        }
+    }
+
     private func handle(clientFD: Int32) {
+        // A client that closes the connection early must not kill this
+        // process with a signal (Darwin): the write simply fails with EPIPE.
+        var noSignal: Int32 = 1
+        setsockopt(clientFD, SOL_SOCKET, SO_NOSIGPIPE, &noSignal, socklen_t(MemoryLayout<Int32>.size))
         var buffer = Data()
         let chunkSize = 4096
         let chunk = UnsafeMutableRawPointer.allocate(byteCount: chunkSize, alignment: 1)
@@ -133,6 +158,11 @@ public final class CliServer {
         guard let object = try? JSONSerialization.jsonObject(with: buffer) as? [String: Any],
               let argv = object["argv"] as? [String] else { return }
         // Delivered on the server queue; UI handlers hop to the main thread themselves.
-        self.onArgv?(argv)
+        guard let answer = self.onArgv?(argv) else { return }
+        // The answer goes back over the same connection, one frame. The frame
+        // is written as a whole: a partial write is finished, never cut.
+        var reply = Data(answer.utf8)
+        reply.append(0x0A)
+        writeAll(clientFD, reply)
     }
 }
