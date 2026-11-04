@@ -75,7 +75,12 @@
   postponed or cancelled breaks still do not count.
 - The optional video feature now covers normal browser windows in the
   frontmost application. Browser controls must belong to an `AXVideo`
-  element, including in fullscreen; audio elements do not qualify. Known
+  element or the verified YouTube player, including in fullscreen; audio
+  elements do not qualify. Safari's YouTube player is recognized by its DOM
+  identity and HTTPS page even when no `AXVideo` is exposed; resume also checks
+  that the full page URL and the original controls remain unchanged. Spoken
+  YouTube shortcut labels such as `Play keyboard shortcut k` are recognized
+  for pause confirmation and resume. Known
   native video players retain their fullscreen control fallback. The search through the
   accessibility tree of the target shares one budget, so a huge page can
   never hold the scheduler, and a report that was cut short says so. Only a

@@ -31,11 +31,21 @@ public enum PlaybackNames {
     }
 
     /// Reduces the name of a control to the word that matters: trimmed and
-    /// lower-case, with one trailing shortcut bracket removed — the web
-    /// players label their buttons "Pause (k)", "暂停 (k)" and the like.
+    /// lower-case, with one supported trailing shortcut annotation removed.
+    /// Web players expose "Pause (k)", "暂停 (k)" or the spoken
+    /// "Play keyboard shortcut k" through Safari accessibility.
     public static func normalizedControlName(_ name: String) -> String {
-        var text = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        if text.count > 2, text.hasSuffix(")"),
+        var text = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        // YouTube also exposes spoken shortcut labels through Safari AX,
+        // e.g. "Play keyboard shortcut k" after a pause. Strip only the
+        // exact suffix with one ASCII key, never arbitrary explanatory text.
+        if let marker = text.range(of: " keyboard shortcut ", options: .backwards) {
+            let key = text[marker.upperBound...]
+            if key.utf8.count == 1, let byte = key.utf8.first,
+               (97...122).contains(byte) || (48...57).contains(byte) {
+                text = String(text[..<marker.lowerBound])
+            }
+        } else if text.count > 2, text.hasSuffix(")"),
            let open = text.lastIndex(of: "("),
            let close = text.lastIndex(of: ")"),
            open < close,

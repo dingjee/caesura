@@ -12,6 +12,7 @@ import CaesuraCore
 enum PlaybackNamesTests {
     static func registerAll() {
         TestRunner.register("playback names: shortcut labels match exactly", shortcutLabels)
+        TestRunner.register("playback names: Safari YouTube spoken shortcut labels", spokenShortcuts)
         TestRunner.register("playback names: no substring of a name ever matches", exactNamesOnly)
         TestRunner.register("playback names: a non-semantic title does not shadow the state", titleShadowing)
         TestRunner.register("playback names: every name attribute counts, help included", everyAttributeCounts)
@@ -34,6 +35,19 @@ enum PlaybackNamesTests {
         try expectEqual(PlaybackNames.classify(["  PAUSE  "]), .pause)
         try expectEqual(PlaybackNames.classify(["Wiedergabe"]), .play)
         try expectNil(PlaybackNames.classify(["Pause (shift + space)"]))
+    }
+
+    static func spokenShortcuts() throws {
+        // Captured fixed UI label from Safari's real YouTube player after
+        // AXPress. No video title or URL is part of this fixture.
+        try expectEqual(PlaybackNames.classify(["Play keyboard shortcut k"]), .play)
+        try expectEqual(PlaybackNames.classify(["Pause keyboard shortcut k"]), .pause)
+        try expectEqual(PlaybackNames.classify(["  PLAY KEYBOARD SHORTCUT K  "]), .play)
+        try expectNil(PlaybackNames.classify(["Play keyboard shortcut "]))
+        try expectNil(PlaybackNames.classify(["Play keyboard shortcut k please"]))
+        try expectNil(PlaybackNames.classify(["Replay keyboard shortcut k"]))
+        try expectNil(PlaybackNames.classify(["Play (k) keyboard shortcut k"]))
+        try expectNil(PlaybackNames.classify(["Play keyboard shortcut k", "Pause (k)"]))
     }
 
     static func exactNamesOnly() throws {

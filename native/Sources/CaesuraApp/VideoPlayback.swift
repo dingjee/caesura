@@ -28,6 +28,9 @@ protocol AccessibilityElement: AnyObject {
     var url: String? { get }
     /// The title of the element (a window has one).
     var title: String? { get }
+    /// Public web accessibility attributes, used only for a known web player.
+    var domIdentifier: String? { get }
+    var domClasses: [String] { get }
     /// The process the element belongs to.
     var processIdentifier: pid_t { get }
     /// True when the element is a window that covers a whole screen.
@@ -63,9 +66,12 @@ protocol AccessibilityElement: AnyObject {
 ///   element carries the subrole `AXAudio` and is never matched, so an audio
 ///   playback is never mistaken for a video). The localised role description
 ///   is never used to decide this: only the subrole counts.
+/// - Safari's YouTube player can omit the video node. Its known DOM player
+///   and button identities are accepted only under an HTTPS YouTube document;
+///   the full document URL is retained and checked again before resume.
 /// - In a window **in fullscreen** the control of a **known native video
 ///   player** may be acted on even outside a video element. A browser in
-///   fullscreen is not such a player: it has to show a video element too.
+///   fullscreen must expose a video element or the verified YouTube player.
 ///
 /// A video that plays is paused by pressing that control, a paused video is
 /// left alone, and a playback that cannot be read is left alone too — the
@@ -289,7 +295,9 @@ enum VideoPlayback {
                     if !names.isEmpty,
                        let verdict = PlaybackNames.classify(names),
                        node.element.supportsPress {
-                        let insideVideo = node.container != nil
+                        let insideVideo = node.container.map {
+                            control(node.element, belongsToVideo: $0, budget: budget)
+                        } ?? false
                         if insideVideo || allowOutsideVideo {
                             if verdict == .pause {
                                 // A playback that runs is decisive.
@@ -304,8 +312,7 @@ enum VideoPlayback {
                     }
                 }
                 // The children of a video element are inside it.
-                let container = (role == groupRole
-                                 && VideoPlaybackRules.isVideoSubrole(node.element.subrole))
+                let container = isVideoContainer(node.element, role: role, budget: budget)
                     ? node.element : node.container
                 for child in node.element.children {
                     // The whole level is bounded, not every parent of it.
@@ -318,6 +325,73 @@ enum VideoPlayback {
         }
         found.exhausted = found.exhausted || budget.isExhausted
         return found
+    }
+
+    /// Safari omits the underlying video from YouTube's AX tree. Match only
+    /// YouTube's actual player on a verified HTTPS document, never a generic
+    /// page group that happens to contain a Pause button.
+    ///
+    /// The role of the element is passed in when the caller has read it
+    /// already: the walk reads the role of every element it visits, and a
+    /// second read of the same attribute is another round trip to the other
+    /// process.
+    private static func youtubeDocumentURL(of container: any AccessibilityElement,
+                                           role: String?,
+                                           budget: TreeBudget? = nil) -> String? {
+        guard role == groupRole,
+              container.domIdentifier == "movie_player",
+              container.domClasses.contains("html5-video-player") else { return nil }
+        var current = container.parent
+        for _ in 0..<40 {
+            guard let element = current, budget?.spend() ?? true else { return nil }
+            let elementRole = element.role
+            if elementRole == "AXWebArea" {
+                guard let text = element.url, let url = URL(string: text),
+                      url.scheme?.lowercased() == "https",
+                      let host = url.host?.lowercased(),
+                      ["youtube.com", "www.youtube.com", "m.youtube.com",
+                       "www.youtube-nocookie.com", "youtube-nocookie.com"].contains(host),
+                      url.user == nil, url.password == nil,
+                      url.port == nil || url.port == 443 else { return nil }
+                return text
+            }
+            if elementRole == "AXWindow" { return nil }
+            current = element.parent
+        }
+        return nil
+    }
+
+    /// The address of the YouTube document above a player container.
+    static func youtubeDocumentURL(of container: any AccessibilityElement, budget: TreeBudget? = nil) -> String? {
+        youtubeDocumentURL(of: container, role: container.role, budget: budget)
+    }
+
+    /// True when the element is a container of a playback: a video element, or
+    /// the verified YouTube player.
+    ///
+    /// The role is passed in by the caller when it has read it already.
+    static func isVideoContainer(_ element: any AccessibilityElement,
+                                 role: String?,
+                                 budget: TreeBudget? = nil) -> Bool {
+        guard role == groupRole else { return false }
+        if VideoPlaybackRules.isVideoSubrole(element.subrole) { return true }
+        return youtubeDocumentURL(of: element, role: role, budget: budget) != nil
+    }
+
+    private static func control(_ control: any AccessibilityElement,
+                                belongsToVideo container: any AccessibilityElement,
+                                budget: TreeBudget? = nil) -> Bool {
+        if VideoPlaybackRules.isVideoSubrole(container.subrole) { return true }
+        return control.domClasses.contains("ytp-play-button")
+            && youtubeDocumentURL(of: container, budget: budget) != nil
+    }
+
+    /// A YouTube player group has no media URL. Its containing document's
+    /// complete URL is required so a persistent player cannot resume a new tab
+    /// navigation or video. Ordinary AXVideo retains its media URL identity.
+    static func mediaIdentity(of container: any AccessibilityElement) -> String? {
+        if VideoPlaybackRules.isVideoSubrole(container.subrole) { return container.url }
+        return youtubeDocumentURL(of: container)
     }
 
     /// May the playback that was paused be resumed?
@@ -342,15 +416,17 @@ enum VideoPlayback {
         guard let container else { return true }
         // The video element has to be there, and the control has to belong to
         // it: a control of another element is never pressed.
-        guard VideoPlaybackRules.isVideoSubrole(container.subrole) else { return false }
-        guard belongsTo(control, container) else { return false }
+        guard isVideoContainer(container, role: container.role),
+              self.control(control, belongsToVideo: container),
+              belongsTo(control, container) else { return false }
         // The video element has to belong to the same process and window too.
         guard container.processIdentifier == processIdentifier else { return false }
         guard belongsToWindow(container, window) else { return false }
         // The media has to be the same one. A recorded address that is gone
         // now is a video that was replaced, not the video that was paused.
+        if !VideoPlaybackRules.isVideoSubrole(container.subrole), containerURL == nil { return false }
         if let recorded = containerURL {
-            guard let current = container.url, current == recorded else { return false }
+            guard let current = mediaIdentity(of: container), current == recorded else { return false }
         }
         return true
     }
@@ -446,6 +522,16 @@ enum VideoPlayback {
             self.element = element
         }
 
+        var domIdentifier: String? {
+            VideoPlayback.string(of: element, attribute: kAXDOMIdentifierAttribute as String)
+        }
+        var domClasses: [String] {
+            setTimeout(on: element)
+            var value: CFTypeRef?
+            guard AXUIElementCopyAttributeValue(element, kAXDOMClassListAttribute as CFString, &value) == .success
+            else { return [] }
+            return value as? [String] ?? []
+        }
         var role: String? { VideoPlayback.string(of: element, attribute: kAXRoleAttribute) }
         var subrole: String? { VideoPlayback.string(of: element, attribute: kAXSubroleAttribute) }
         var names: [String] { VideoPlayback.names(of: element) }
@@ -645,7 +731,31 @@ final class VideoPlaybackController {
             // paused, and a video that is replaced in between is a different
             // one.
             let container = observation.container
-            let containerURL = container?.url
+            let containerURL = container.flatMap { VideoPlayback.mediaIdentity(of: $0) }
+            if let container, !VideoPlaybackRules.isVideoSubrole(container.subrole) {
+                // A web player is only acted on when the very same document,
+                // the very same player and the very same button are still
+                // there. Every refusal says why it refuses.
+                guard containerURL != nil else {
+                    Log.warn("Caesura: the player of '\(target.name)' has no document address, "
+                             + "nothing is pressed")
+                    return
+                }
+                guard VideoPlayback.belongsTo(control, container) else {
+                    Log.warn("Caesura: the control of '\(target.name)' does not belong to the player "
+                             + "any more, nothing is pressed")
+                    return
+                }
+                guard control.domClasses.contains("ytp-play-button") else {
+                    Log.warn("Caesura: the control of '\(target.name)' is not the play button of the "
+                             + "player, nothing is pressed")
+                    return
+                }
+                guard VideoPlayback.mediaIdentity(of: container) == containerURL else {
+                    Log.warn("Caesura: the document of '\(target.name)' changed, nothing is pressed")
+                    return
+                }
+            }
             let window = observation.window ?? control
             let fullscreen = window.isFullscreenWindow
             // The control has to say "Pause" again right now: an observation

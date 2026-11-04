@@ -54,10 +54,15 @@ Idle time, sleep, lock, app exclusions and the Focus heuristic can pause the
 schedule. Strict Mode restricts dismissal; Manual Finish waits for your action.
 An optional video feature pauses and resumes readable video playback in the
 frontmost application. Browser windows, including fullscreen ones, must expose
-a video element (`AXVideo`) containing a play/pause control; audio elements do
-not qualify. Known native video players also retain their fullscreen control
-fallback. Custom web players that do not expose these video controls remain
-unsupported. The feature needs Caesura's accessibility permission, requested
+a video element (`AXVideo`) containing a play/pause control, or the verified
+YouTube player and its own play/pause button. Safari can omit `AXVideo` for
+YouTube: that player is matched by its DOM identity and HTTPS YouTube page,
+and playback is resumed only while the same page and controls remain.
+Both bracketed and spoken shortcut labels (such as `Play keyboard shortcut k`)
+are recognized.
+Audio elements do not qualify. Known native video players also retain their
+fullscreen control fallback. Other custom web players without recognizable
+video controls remain unsupported. The feature needs Caesura's accessibility permission, requested
 only from its Preferences button.
 
 A break opens with a soft radial reveal: the blurred background and the poem

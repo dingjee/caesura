@@ -28,6 +28,8 @@ enum VideoPlaybackProbe {
     /// press can be checked.
     final class FakeElement: AccessibilityElement {
         var role: String?
+        var domIdentifier: String?
+        var domClasses: [String] = []
         var subrole: String?
         var names: [String]
         var supportsPress: Bool
@@ -112,6 +114,137 @@ enum VideoPlaybackProbe {
         controller.targetProvider = { target }
         controller.observer = { _ in observation }
         return controller
+    }
+
+    /// The actual Safari YouTube shape: no AXVideo, a stable player group
+    /// and a sibling control bar under the document.
+    static func youtubeWindow(url: String = "https://www.youtube.com/watch?v=first",
+                              fullscreen: Bool = false)
+        -> (window: FakeElement, page: FakeElement, player: FakeElement, control: FakeElement) {
+        let window = FakeElement(role: "AXWindow", title: "Page", isFullscreenWindow: fullscreen)
+        let page = FakeElement(role: "AXWebArea", url: url)
+        window.add(page)
+        let player = FakeElement(role: "AXGroup")
+        player.domIdentifier = "movie_player"
+        player.domClasses = ["html5-video-player"]
+        page.add(player)
+        // The real labels of the YouTube player: "Pause keyboard shortcut k"
+        // while it plays and "Play keyboard shortcut k" while it is paused.
+        let control = FakeElement(role: "AXButton",
+                                   names: ["Pause keyboard shortcut k"],
+                                   namesAfterPress: ["Play keyboard shortcut k"])
+        control.domClasses = ["ytp-play-button", "ytp-button"]
+        player.add(control)
+        return (window, page, player, control)
+    }
+
+    static func youtubeChecks() -> [String: Bool] {
+        var checks: [String: Bool] = [:]
+        func search(_ window: FakeElement) -> VideoPlayback.Search {
+            VideoPlayback.search(in: window, budget: TreeBudget(seconds: 1, maximumElements: 2_500),
+                                 allowOutsideVideo: false)
+        }
+        for fullscreen in [false, true] {
+            let tree = youtubeWindow(fullscreen: fullscreen)
+            let found = search(tree.window)
+            let prefix = fullscreen ? "youtubeFullscreen" : "youtubeWindow"
+            checks[prefix + "FoundWithoutAXVideo"] = found.verdict == .pause
+                && found.container === tree.player && found.control === tree.control
+            let controller = makeController(for: VideoPlayback.Observation(state: .playing,
+                window: tree.window, container: found.container, control: found.control))
+            controller.pauseIfNeeded()
+            checks[prefix + "PausedOnce"] = controller.didPause && tree.control.pressCount == 1
+            controller.resumeIfNeeded()
+            checks[prefix + "ResumedOnce"] = !controller.didPause && tree.control.pressCount == 2
+        }
+        for url in ["https://example.test/watch?v=x", "https://youtube.com.example.test/watch?v=x",
+                    "https://music.youtube.com/watch?v=x", "http://www.youtube.com/watch?v=x",
+                    "https://www.youtube.com:444/watch?v=x"] {
+            let tree = youtubeWindow(url: url)
+            checks["rejectOrigin:" + url] = search(tree.window).verdict == nil
+        }
+        let missingID = youtubeWindow()
+        missingID.player.domIdentifier = "other"
+        checks["youtubeRejectMissingPlayerID"] = search(missingID.window).verdict == nil
+        let missingClass = youtubeWindow()
+        missingClass.player.domClasses = []
+        checks["youtubeRejectMissingPlayerClass"] = search(missingClass.window).verdict == nil
+        let unknownButton = youtubeWindow()
+        unknownButton.control.domClasses = []
+        checks["youtubeRejectGenericPause"] = search(unknownButton.window).verdict == nil
+        let unreadable = youtubeWindow()
+        unreadable.control.names = ["Play/Pause"]
+        checks["youtubeRejectUnknownState"] = search(unreadable.window).verdict == nil
+        let disabled = youtubeWindow()
+        disabled.control.supportsPress = false
+        checks["youtubeRejectUnpressable"] = search(disabled.window).verdict == nil
+        // A play button that sits outside the player group is not the player:
+        // only a control inside the player may be acted on.
+        let strayWindow = FakeElement(role: "AXWindow", title: "Page")
+        let strayPage = FakeElement(role: "AXWebArea", url: "https://www.youtube.com/watch?v=first")
+        strayWindow.add(strayPage)
+        let strayPlayer = FakeElement(role: "AXGroup")
+        strayPlayer.domIdentifier = "movie_player"
+        strayPlayer.domClasses = ["html5-video-player"]
+        strayPage.add(strayPlayer)
+        let stray = FakeElement(role: "AXButton",
+                                names: ["Pause keyboard shortcut k"],
+                                namesAfterPress: ["Play keyboard shortcut k"])
+        stray.domClasses = ["ytp-play-button", "ytp-button"]
+        strayPage.add(stray)
+        checks["youtubeRejectButtonOutsidePlayer"] = search(strayWindow).verdict == nil
+        // An observation that lost its document or its parent is never acted
+        // on: nothing is pressed at all.
+        let lostOrigin = youtubeWindow()
+        lostOrigin.page.url = nil
+        let lostOriginController = makeController(for: VideoPlayback.Observation(state: .playing,
+            window: lostOrigin.window, container: lostOrigin.player, control: lostOrigin.control))
+        lostOriginController.pauseIfNeeded()
+        checks["youtubePauseRejectLostOrigin"] = lostOrigin.control.pressCount == 0
+            && !lostOriginController.didPause
+        let lostParent = youtubeWindow()
+        lostParent.control.parent = lostParent.page
+        let lostParentController = makeController(for: VideoPlayback.Observation(state: .playing,
+            window: lostParent.window, container: lostParent.player, control: lostParent.control))
+        lostParentController.pauseIfNeeded()
+        checks["youtubePauseRejectLostParent"] = lostParent.control.pressCount == 0
+            && !lostParentController.didPause
+        let quiet = youtubeWindow()
+        quiet.control.names = ["Play keyboard shortcut k"]
+        let quietResult = search(quiet.window)
+        let quietController = makeController(for: VideoPlayback.Observation(state: .paused,
+            window: quiet.window, container: quietResult.container, control: quietResult.control))
+        quietController.pauseIfNeeded()
+        checks["youtubeInitiallyPausedUntouched"] = quietResult.verdict == .play && quiet.control.pressCount == 0
+        for change in ["navigation", "origin", "player", "button", "window", "userPlayback"] {
+            let tree = youtubeWindow()
+            let controller = makeController(for: VideoPlayback.Observation(state: .playing,
+                window: tree.window, container: tree.player, control: tree.control))
+            controller.pauseIfNeeded()
+            switch change {
+            case "navigation": tree.page.url = "https://www.youtube.com/watch?v=second"
+            case "origin": tree.page.url = "https://example.test/watch?v=first"
+            case "player": tree.player.domIdentifier = "replaced"
+            case "button": tree.control.domClasses = []
+            case "window": tree.window.title = nil
+            default: _ = tree.control.press()
+            }
+            let before = tree.control.pressCount
+            controller.resumeIfNeeded()
+            checks["youtubeResumeReject:" + change] = tree.control.pressCount == before
+        }
+        let moved = youtubeWindow()
+        let controller = makeController(for: VideoPlayback.Observation(state: .playing,
+            window: moved.window, container: moved.player, control: moved.control))
+        controller.pauseIfNeeded()
+        moved.control.parent = moved.page
+        controller.resumeIfNeeded()
+        checks["youtubeResumeRejectReparentedButton"] = moved.control.pressCount == 1
+        let limited = youtubeWindow()
+        let budget = TreeBudget(seconds: 1, maximumElements: 3)
+        checks["youtubeSharesSearchBudget"] = VideoPlayback.search(in: limited.window,
+            budget: budget, allowOutsideVideo: false).verdict == nil && budget.isExhausted
+        return checks
     }
 
     /// Runs the probe and returns its checks.
@@ -237,7 +370,7 @@ enum VideoPlaybackProbe {
                                                                        control: userStarted.control))
         userController.pauseIfNeeded()
         // The user pressed the control themselves: the video plays again.
-        userStarted.control.press()
+        _ = userStarted.control.press()
         userController.resumeIfNeeded()
         let userPlaybackIsLeftAlone = userStarted.control.pressCount == 2
 
@@ -251,7 +384,7 @@ enum VideoPlaybackProbe {
         let sameElementIsTheSame = first.isSameElement(as: second)
             && !first.isSameElement(as: ownApplication)
 
-        return [
+        var checks: [String: Any] = [
             "measured": true,
             "videoIsFound": videoIsFound,
             "audioIsNotAVideo": audioIsNotAVideo,
@@ -270,5 +403,7 @@ enum VideoPlaybackProbe {
             "userPlaybackIsLeftAlone": userPlaybackIsLeftAlone,
             "sameElementIsTheSame": sameElementIsTheSame,
         ]
+        for (name, passed) in youtubeChecks() { checks[name] = passed }
+        return checks
     }
 }
