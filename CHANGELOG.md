@@ -120,6 +120,11 @@
   types and the immediate-skip behaviour are unchanged.
 - Documentation and this changelog entry were drafted with AI assistance
   (OpenCode) and verified locally by the maintainer.
+- Releases can be notarized: a `Developer ID Application` signature carries
+  the hardened runtime, `native/scripts/notarize-app.sh` uploads the bundle
+  to Apple's notary service, staples the ticket and writes the distributable
+  zip with its SHA-256 — a downloaded Caesura then opens without a Gatekeeper
+  detour. The local trial keeps its development signature.
 - The persistent trial profile lives at
   `~/Library/Application Support/Caesura` and the ordinary native profile at
   `~/Library/Application Support/CaesuraNative`. A first run imports the

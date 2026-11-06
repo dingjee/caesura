@@ -48,18 +48,23 @@ resolve_sign_identity() {
 # covers exactly these signatures.
 sign_bundle() {
   local app="$1" identity bin
+  local runtime=()
   identity="$(resolve_sign_identity)"
   if [[ -n "$identity" ]]; then
-    echo "== codesign with the identity: $identity =="
+    # A notarized release requires the hardened runtime, and the runtime
+    # belongs to the release identity: a "Developer ID Application" signature
+    # carries it, a development or ad-hoc signature stays as it was.
+    [[ "$identity" == "Developer ID Application: "* ]] && runtime=(--options runtime)
+    echo "== codesign with the identity: $identity${runtime:+ (hardened runtime)} =="
     if [[ -d "$app/Contents/Frameworks/MediaRemoteAdapter.framework" ]]; then
-      codesign --force --sign "$identity" "$app/Contents/Frameworks/MediaRemoteAdapter.framework"
+      codesign --force "${runtime[@]}" --sign "$identity" "$app/Contents/Frameworks/MediaRemoteAdapter.framework"
     fi
     for bin in caesura-cli Caesura; do
       if [[ -x "$app/Contents/MacOS/$bin" ]]; then
-        codesign --force --sign "$identity" "$app/Contents/MacOS/$bin"
+        codesign --force "${runtime[@]}" --sign "$identity" "$app/Contents/MacOS/$bin"
       fi
     done
-    codesign --force --sign "$identity" "$app"
+    codesign --force "${runtime[@]}" --sign "$identity" "$app"
   else
     echo "== ad-hoc codesign =="
     codesign --force --deep --sign - "$app"

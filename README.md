@@ -158,9 +158,35 @@ A signed bundle matters for the permissions of macOS: an ad-hoc signature has
 a designated requirement of nothing but the hash of the binary, so macOS asks
 for the accessibility permission again after every rebuild.
 
+### Notarized releases
+
+A bundle signed with a `Developer ID Application` certificate can be
+notarized, and a notarized bundle is the only kind Gatekeeper opens without a
+warning: whoever downloads the release unzips it and opens the app. This path
+stays separate from the local trial — a `Developer ID Application` signature
+carries the hardened runtime (`sign_bundle` adds `--options runtime` for that
+identity alone), while the trial keeps its ordinary development signature.
+
+After the one-time setup of a machine — create the certificate in Xcode
+(Settings → Accounts → Manage Certificates), name it in
+`signing-identity.local`, and store the notary credentials with
+`xcrun notarytool store-credentials caesura-notary` — a release is two
+commands:
+
+```sh
+CAESURA_NATIVE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
+  native/scripts/package-app.sh
+native/scripts/notarize-app.sh
+```
+
+The script uploads the bundle to the notary service, staples the ticket back
+onto it, verifies the result with `spctl`, and writes
+`Caesura-macOS-arm64.zip` next to the bundle together with its SHA-256, which
+the release notes quote.
+
 CI runs core checks on macOS and packages builds from `main` or a manual
 dispatch. Artifacts are workflow downloads, not automatically published
-releases.
+releases; a public release is packaged and notarized locally.
 
 GUI checks are optional development tools. Use a temporary `--data-dir` profile,
 a secondary display, no activation and no sounds. With no secondary display,
