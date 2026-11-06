@@ -41,6 +41,13 @@ public enum SettingsPolicy {
         "poemFullRepeats": 0...9
     ]
 
+    /// Multipliers that must be finite and stay inside their range. A value of
+    /// the wrong type or a non-finite value falls back to the default of the
+    /// key, a value outside the range is clamped into it.
+    public static let boundedDoubleKeys: [String: ClosedRange<Double>] = [
+        PoemSpacing.settingKey: PoemSpacing.minimumFactor...PoemSpacing.maximumFactor
+    ]
+
     public static let booleanKeys: Set<String> = [
         "breakNotification", "microbreakNotification", "microbreak", "break",
         "microbreakStrictMode", "breakStrictMode", "microbreakPostpone", "breakPostpone",
@@ -94,6 +101,10 @@ public enum SettingsPolicy {
                   let d = value.doubleValue, d.isFinite, d == d.rounded(.towardZero),
                   range.contains(Int(d)) else { return defaultValue }
             return nil
+        case let key where boundedDoubleKeys[key] != nil:
+            guard let range = boundedDoubleKeys[key],
+                  let d = value.doubleValue, d.isFinite else { return defaultValue }
+            return SettingsValue.double(min(max(d, range.lowerBound), range.upperBound))
         case "morningHour":
             // Either an hour of the day or the string "sunrise".
             guard isMorningHourValue(value) else { return defaultValue }
@@ -219,6 +230,9 @@ public enum DefaultSettings {
         // Native-only: how often the complete poem is repeated before the
         // rotation shows the next poem.
         "poemFullRepeats": .int(2),
+        // Native-only: the multiplier of the spacing of the lines of a poem
+        // (the base spacing times this factor).
+        PoemSpacing.settingKey: .double(PoemSpacing.defaultFactor),
         // Native-only: persisted poem rotation state (order/position/showings).
         "poemRotation": .object([:])
     ]

@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 import CaesuraCore
 
 /// Opt-in probe of the radial reveal of the break window (development only).
@@ -85,6 +86,53 @@ enum RevealProbe {
         let samplesAfterExit = entry.pointerSampleCount
         PoemProbe.pumpMainRunLoop(seconds: 0.08)
         let samplesAfterExitIdle = entry.pointerSampleCount
+        let maskRemovedAfterTheExit = entryWindow.revealMaskTarget?.layer?.mask == nil
+
+        // MARK: The reader's scroller is masked like every other pixel
+
+        // The break window hosts the real reading viewport (the AppKit bridge)
+        // and is never ordered in. The view tree is followed instead of a
+        // guess: the scroll view and its scroller must be descendants of the
+        // host the reveal mask sits on, so no second surface of the reader can
+        // leak past the wave. The wave itself carries the mask onto that host
+        // and the cancel of the wave takes it off again.
+        let contentWindow = BreakWindow(screen: screen, contentRect: frame,
+                                        regularWindows: false, fullscreen: false)
+        let controller = PoemFocusController()
+        let geometry = PoemFocusGeometry(centers: [100], hasWords: [true], rowUnit: 40, uniform: false)
+        let hosted = NSHostingView(rootView: PoemScrollViewport(
+            width: frame.width, height: frame.height,
+            contentHeight: frame.height * 3,
+            followOffset: nil, followAnchorY: nil,
+            geometry: geometry, userScrolled: false, initialFraction: nil,
+            focusController: controller, contentKey: "probe-scroller",
+            content: { Color.clear }))
+        contentWindow.setBreakContent(hosted)
+        let contentDriver = BreakRevealDriver(
+            origin: GlobalPoint(x: pointer.x, y: pointer.y),
+            targetFrames: targetFrames, reduceMotion: false, regularWindows: false,
+            pointer: pointerProvider, now: { clock })
+        // The hidden mask is applied with the attach, before the window would
+        // be ordered front — exactly like the break does it.
+        contentDriver.attach(window: contentWindow, index: 0)
+        let contentMaskDuringTheWave = contentWindow.revealMaskTarget?.layer?.mask != nil
+        PoemProbe.pumpMainRunLoop(seconds: 0.08)
+        let scrollView = Self.findScrollView(in: hosted)
+        let scrollerInsideTheMask: Bool = {
+            guard let scrollView else { return false }
+            let host = contentWindow.revealMaskTarget
+            return Self.isDescendant(scrollView, of: host)
+                && scrollView.verticalScroller.map({ Self.isDescendant($0, of: host) }) == true
+        }()
+        // The overlay presentation is accepted in the hosted tree with the
+        // scroller subclass installed (the bridge probe asserts the drawing
+        // separately); a demotion to the legacy style would reserve space and
+        // shift the poem's measured width.
+        scrollView?.scrollerStyle = .overlay
+        let overlayScrollerAccepted = scrollView?.scrollerStyle == .overlay
+            && scrollView?.verticalScroller is PoemScroller
+        contentDriver.cancel()
+        let contentMaskRemovedAfterCancel = contentWindow.revealMaskTarget?.layer?.mask == nil
 
         // MARK: A cancelled wave never calls back
 
@@ -127,8 +175,33 @@ enum RevealProbe {
             "noSamplingAfterTheExit": samplesAfterExitIdle == samplesAfterExit,
             "cancelledWaveStopsSampling": samplesAfterCancel == samplesBeforeCancel,
             "cancelledWaveNeverCallsBack": !cancelledExitCompleted,
+            "maskRemovedAfterTheExit": maskRemovedAfterTheExit,
+            "scrollerInsideTheMask": scrollerInsideTheMask,
+            "overlayScrollerAccepted": overlayScrollerAccepted,
+            "contentMaskPresentDuringTheWave": contentMaskDuringTheWave,
+            "contentMaskRemovedAfterCancel": contentMaskRemovedAfterCancel,
             "pointerSamples": samples,
         ]
         return checks
+    }
+
+    /// The scroll view of a hosted tree, if there is one.
+    private static func findScrollView(in view: NSView) -> PoemScrollView? {
+        if let scroll = view as? PoemScrollView { return scroll }
+        for subview in view.subviews {
+            if let found = findScrollView(in: subview) { return found }
+        }
+        return nil
+    }
+
+    /// True when `view` is `root` itself or lives in its subtree.
+    private static func isDescendant(_ view: NSView, of root: NSView?) -> Bool {
+        guard let root else { return false }
+        var current: NSView? = view
+        while let node = current {
+            if node === root { return true }
+            current = node.superview
+        }
+        return false
     }
 }

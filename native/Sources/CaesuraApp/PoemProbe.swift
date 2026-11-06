@@ -59,7 +59,8 @@ enum PoemProbe {
         let nsFont = BreakTypography.serifFont(.body, height: height, weight: .medium, italic: true)
 
         // The reading window with the whole poem.
-        let reading = PoemReadingView(poem: poem, imagesDirectory: directory)
+        let reading = PoemReadingView(poem: poem, imagesDirectory: directory,
+                                         lineSpacingFactor: PoemSpacing.defaultFactor)
             .environment(\.colorScheme, .light)
             .frame(width: 620, height: 560)
             .background(Color.white)
@@ -230,6 +231,7 @@ enum PoemProbe {
         let summary: [String: Any] = ["cases": cases,
                                       "bridge": bridgeProbe(directory: directory),
                                       "viewport": viewportProbe(),
+                                      "spacing": spacingProbe(),
                                       "focus": focusProbe(directory: directory),
                                       "reveal": RevealProbe.run()]
         if let data = try? JSONSerialization.data(withJSONObject: summary,
@@ -625,6 +627,54 @@ enum PoemProbe {
             if let found = findScrollView(in: subview) { return found }
         }
         return nil
+    }
+
+    // MARK: The spacing probe
+
+    /// The body layout never rounds the spacing away: two nearby multipliers
+    /// whose spacing shares one rounded value (8.76 and 9.49 both round to 9)
+    /// must still be two different measurements — a cache hit on the rounded
+    /// key would hand the layout of one multiplier to the other, and the
+    /// drawn stack would disagree with the measured scroll height. Run
+    /// offscreen, through the real cache path of the resolver.
+    @MainActor
+    private static func spacingProbe() -> [String: Any] {
+        let lines = ["A first line to measure at width",
+                     "A second line to measure below it",
+                     "A third line to measure at the end"]
+        let natural = BreakTypography.size(.body, forHeight: height)
+        let font = { (size: CGFloat) in
+            BreakTypography.serifFont(size: size, weight: .medium, italic: true)
+        }
+        // The base spacing of the window is 7.3: the default multiplier and
+        // the next slider step land 8.76 and 9.49 — the same rounded 9.
+        let small = PoemBodyLayoutResolver.natural(
+            lines: lines, natural: natural, width: width, height: height,
+            spacing: 7.3 * 1.2, font: font)
+        let large = PoemBodyLayoutResolver.natural(
+            lines: lines, natural: natural, width: width, height: height,
+            spacing: 7.3 * 1.3, font: font)
+        // The heights the resolver has to produce: every block measured at
+        // the width, plus the exact spacing between the blocks, plus the
+        // slack the resolver keeps free (see `PoemBodyLayoutResolver`).
+        let blocks = lines.map {
+            NSAttributedString(string: $0, attributes: [.font: font(natural)])
+        }
+        let wrapped = PoemBodyMetrics.heights(of: blocks, width: width)
+        func expected(_ spacing: CGFloat) -> CGFloat {
+            wrapped.reduce(0, +) + spacing * CGFloat(max(0, blocks.count - 1)) + 2
+        }
+        func isExact(_ layout: PoemBodyLayout, spacing: CGFloat) -> Bool {
+            abs(layout.contentHeight - expected(spacing)) < 0.001
+        }
+        return [
+            "smallSpacing": Double(7.3 * 1.2),
+            "largeSpacing": Double(7.3 * 1.3),
+            "nearbySpacingsMeasureDifferentHeights":
+                small.contentHeight != large.contentHeight,
+            "smallSpacingMeasuredExactly": isExact(small, spacing: 7.3 * 1.2),
+            "largeSpacingMeasuredExactly": isExact(large, spacing: 7.3 * 1.3),
+        ]
     }
 
     // MARK: The focus probe

@@ -60,7 +60,10 @@ enum PoemBodyLayoutResolver {
                         spacing: CGFloat, font: @escaping (CGFloat) -> NSFont) -> PoemBodyLayout {
         let key = Key(text: lines.joined(separator: "\n"),
                       width: Int(width.rounded()), height: Int(height.rounded()),
-                      natural: Int(natural.rounded()))
+                      natural: Int(natural.rounded()),
+                      // The spacing stays exact: two nearby multipliers that
+                      // share a rounded value must still measure two heights.
+                      spacing: spacing)
         return cache.layout(for: key) {
             let blocks = lines.map {
                 NSAttributedString(string: $0, attributes: [.font: font(natural)])
@@ -79,6 +82,11 @@ enum PoemBodyLayoutResolver {
         let width: Int
         let height: Int
         let natural: Int
+        /// The spacing of the stack is part of the measured height, so it is
+        /// part of the identity of the measurement — exactly, without
+        /// rounding: a cache hit on a rounded value would hand the layout of
+        /// one multiplier to another.
+        let spacing: CGFloat
     }
 
     private static let cache = PoemBodyLayoutCache()

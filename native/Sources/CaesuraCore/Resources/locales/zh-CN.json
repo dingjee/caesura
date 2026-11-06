@@ -21,7 +21,11 @@
     "warning": "即将恢复默认值，所有已有设置会被清除。",
     "continue": "继续",
     "cancel": "取消",
-    "preferences": "偏好设置"
+    "preferences": "偏好设置",
+    "skipMiniBreakNow": "立即开始小憩",
+    "skipLongBreakNow": "立即开始休息",
+    "skipMiniBreakIn": "跳过 {{minutes}} 分钟，立即开始小憩",
+    "skipLongBreakIn": "跳过 {{minutes}} 分钟，立即开始休息"
   },
   "break": {
     "postpone": "延后此次休息",
@@ -49,7 +53,8 @@
       "language": "选择语言：",
       "restoreDefaults": "还原至默认值",
       "poemFullRepeats": "整首重复次数",
-      "poemFullRepeatsInfo": "诗完整显示之后，再完整重复几次，然后换下一首。"
+      "poemFullRepeatsInfo": "诗完整显示之后，再完整重复几次，然后换下一首。",
+      "poemLineSpacing": "诗歌行距"
     },
     "schedule": {
       "miniBreaks": "小憩：",

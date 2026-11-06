@@ -6,8 +6,11 @@
 # opaque centre, the clear exterior, the feathered edge, the exact hidden and
 # full endpoints, the soft emergence of an early radius, the orientation of the
 # raster in the non-flipped host and the bounded size of the allocation. The
-# layer mask is rendered offscreen; no window is ever shown and nothing is
-# activated.
+# material mask of the real consumer (NSVisualEffectView.maskImage, built by
+# the production code in native/Sources/CaesuraApp/RadialMaskImage.swift) is
+# rendered offscreen and compared with the direct content mask of the break
+# content. The layer mask is rendered offscreen; no window is ever shown and
+# nothing is activated.
 #
 # Usage: native/scripts/radial-mask-test.sh
 
@@ -31,6 +34,8 @@ echo "== compiling the radial mask raster and its pixel checks =="
 xcrun swiftc \
   -o "$WORK/radial-mask-test" \
   "$ROOT/native/Sources/CaesuraApp/RadialMaskRaster.swift" \
+  "$ROOT/native/Sources/CaesuraApp/RadialMaskImage.swift" \
+  "$ROOT/native/Tests/RadialMaskRasterTests/MaterialMaskProbe.swift" \
   "$ROOT/native/Tests/RadialMaskRasterTests/main.swift"
 
 echo "== radial mask pixel checks =="

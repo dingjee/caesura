@@ -224,8 +224,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         }
 
         let input = StatusMessages.Input(planner: planner, settings: settings)
-        let statusMessage = StatusMessages.trayMessage(input, longBreaksEnabled: settings.getBool("break"),
-                                                       localization: localization)
+        let statusMessage = StatusMessages.stateMessage(input, localization: localization)
         if !statusMessage.isEmpty {
             for line in statusMessage.components(separatedBy: "\n") {
                 let item = menu.addItem(withTitle: line, action: nil, target: nil)
@@ -241,23 +240,18 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         }
 
         let schedulerCleared = planner.exclusionsMachine.isSchedulerCleared
-        let anyBreakEnabled = settings.getBool("break") || settings.getBool("microbreak")
         let notPausedAnywhere = !(planner.isPaused || planner.dndMachine.isOnDnd || schedulerCleared)
-        if notPausedAnywhere && anyBreakEnabled {
-            let skip = addItem(to: menu, title: localization.t("main.skipToTheNext"),
-                               symbol: "forward.end", action: nil, target: nil)
-            let submenu = NSMenu()
-            if settings.getBool("microbreak") {
-                addItem(to: submenu, title: localization.t("main.toMicrobreak"),
-                        symbol: "timer",
-                        action: #selector(skipToMicrobreakClicked), target: self)
+        // The countdown of the next break and the skip menu are one: an item
+        // per break type that starts that type at once. The minutes are shown
+        // only for the type that is planned right now — the countdown of the
+        // scheduler is exact for it, and no other number is invented.
+        if notPausedAnywhere {
+            for item in MenuSkipPlan.items(planner: planner, settings: settings) {
+                addItem(to: menu, title: skipItemTitle(item),
+                        symbol: item.isMini ? "timer" : "cup.and.saucer",
+                        action: item.isMini ? #selector(skipToMicrobreakClicked) : #selector(skipToBreakClicked),
+                        target: self)
             }
-            if settings.getBool("break") {
-                addItem(to: submenu, title: localization.t("main.toBreak"),
-                        symbol: "cup.and.saucer",
-                        action: #selector(skipToBreakClicked), target: self)
-            }
-            skip.submenu = submenu
         }
 
         if planner.isPaused {
@@ -311,6 +305,16 @@ final class StatusBarController: NSObject, NSMenuDelegate {
             item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: title)
         }
         return item
+    }
+
+    /// The title of one skip item: the minutes are part of the title only when
+    /// the plan of that type is exact (see `MenuSkipPlan`).
+    private func skipItemTitle(_ item: MenuSkipPlan.Item) -> String {
+        if let minutes = item.minutes {
+            return localization.t(item.isMini ? "main.skipMiniBreakIn" : "main.skipLongBreakIn",
+                                  options: ["minutes": minutes])
+        }
+        return localization.t(item.isMini ? "main.skipMiniBreakNow" : "main.skipLongBreakNow")
     }
 
     // MARK: Actions

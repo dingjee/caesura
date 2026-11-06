@@ -140,6 +140,19 @@ final class PreferencesController: ObservableObject {
         })
     }
 
+    /// The multiplier of the spacing of the poem's lines: a clamped Double end
+    /// to end, so the slider never writes a value the reader cannot read back.
+    func poemLineSpacing() -> Binding<Double> {
+        Binding(get: { [weak self] in
+            guard let self else { return PoemSpacing.defaultFactor }
+            return PoemSpacing.factor(settings: self.settings)
+        }, set: { [weak self] newValue in
+            self?.coordinator?.saveSetting(key: PoemSpacing.settingKey,
+                                           value: .double(PoemSpacing.factor(raw: newValue)))
+            self?.snapshot = self?.settings.values ?? [:]
+        })
+    }
+
     /// The single background choice over the two legacy keys: Solid =
     /// transparentMode false + blurredBackground false, Translucent = true + false,
     /// Frosted = true + true. The keys themselves are unchanged: nothing is
@@ -252,6 +265,11 @@ struct PreferencesView: View {
                            help: t("preferences.settings.poemFullRepeatsInfo"),
                            binding: controller.poemFullRepeats(),
                            range: 0...PoemRotation.maxExtraRepeats)
+            LabeledSlider(label: t("preferences.settings.poemLineSpacing"),
+                          binding: controller.poemLineSpacing(),
+                          range: PoemSpacing.minimumFactor...PoemSpacing.maximumFactor,
+                          step: PoemSpacing.step,
+                          format: { value in "×" + value.formatted(.number.precision(.fractionLength(1))) })
             Toggle(t("preferences.settings.monitorIdleTime"), isOn: controller.bool("naturalBreaks"))
             Toggle(t("preferences.settings.monitorDnd"), isOn: controller.invertedBool("monitorDnd"))
             // Language selection UI is paused (English-only release); the
@@ -533,6 +551,8 @@ struct LabeledSlider: View {    var label: String
             Text(label)
                 .frame(width: 170, alignment: .leading)
             Slider(value: $binding, in: range, step: step)
+                .accessibilityLabel(label)
+                .accessibilityValue(format(binding))
             Text(format(binding))
                 .monospacedDigit()
                 .frame(width: 110, alignment: .trailing)

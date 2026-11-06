@@ -10,10 +10,14 @@ import CaesuraCore
 struct PoemWindowView: View {
     let poem: Poem
     let imagesDirectory: URL
+    /// The multiplier of the spacing of the poem's lines (the setting the
+    /// breaks read too), read when the window was opened.
+    let lineSpacingFactor: Double
 
     var body: some View {
         ScrollView {
-            PoemReadingView(poem: poem, imagesDirectory: imagesDirectory)
+            PoemReadingView(poem: poem, imagesDirectory: imagesDirectory,
+                            lineSpacingFactor: lineSpacingFactor)
         }
     }
 }
@@ -23,6 +27,8 @@ struct PoemWindowView: View {
 struct PoemReadingView: View {
     let poem: Poem
     let imagesDirectory: URL
+    /// The multiplier of the spacing of the poem's lines.
+    let lineSpacingFactor: Double
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -36,7 +42,7 @@ struct PoemReadingView: View {
             Text(verses)
                 .font(.system(size: 17, design: .serif))
                 .italic()
-                .lineSpacing(7)
+                .lineSpacing(7 * PoemSpacing.factor(raw: lineSpacingFactor))
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)
         }

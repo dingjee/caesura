@@ -24,48 +24,49 @@ public enum StatusMessages {
         }
     }
 
-    /// Base message without the long-break suffix (suffix needs the `break` setting).
-    public static func trayMessage(_ input: Input, localization: Localization) -> String {
-        var message = ""
+    /// The state of the planner only: paused, Do Not Disturb and an app
+    /// exclusion rule. The menu bar menu shows these lines — the countdown of
+    /// the next break is part of the skip items there, so it is not repeated.
+    public static func stateMessage(_ input: Input, localization: Localization) -> String {
         if input.reference == "finishMicrobreak" || input.reference == "finishBreak" {
-            return message
+            return ""
         }
-
         if input.isPaused {
             if let timeLeft = input.timeLeft, timeLeft > 0 {
-                message += localization.t("statusMessages.paused") + " - " +
+                return localization.t("statusMessages.paused") + " - " +
                     localization.t("statusMessages.resuming") + " " +
                     localization.formatTimeIn(timeLeft)
-                return message
             }
-            message += localization.t("statusMessages.paused") + " " +
+            return localization.t("statusMessages.paused") + " " +
                 localization.t("statusMessages.indefinitely")
-            return message
         }
-
         if input.doNotDisturb {
-            message += localization.t("statusMessages.paused") + " - " + localization.t("statusMessages.dndMode")
-            return message
+            return localization.t("statusMessages.paused") + " - " +
+                localization.t("statusMessages.dndMode")
         }
-
         if input.appExclusionPause {
-            message += localization.t("statusMessages.paused") + " - " + localization.t("statusMessages.appExclusion")
-            return message
+            return localization.t("statusMessages.paused") + " - " +
+                localization.t("statusMessages.appExclusion")
         }
+        return ""
+    }
+
+    /// Base message without the long-break suffix (suffix needs the `break` setting).
+    public static func trayMessage(_ input: Input, localization: Localization) -> String {
+        let state = stateMessage(input, localization: localization)
+        if !state.isEmpty { return state }
 
         if input.reference == "startBreak" || input.reference == "startBreakNotification" {
-            message += localization.t("statusMessages.nextLongBreak") + " " +
+            return localization.t("statusMessages.nextLongBreak") + " " +
                 localization.formatTimeIn(input.timeToNextBreak ?? 0)
-            return message
         }
 
         if input.reference == "startMicrobreak" || input.reference == "startMicrobreakNotification" {
-            message += localization.t("statusMessages.nextMiniBreak") + " " +
+            return localization.t("statusMessages.nextMiniBreak") + " " +
                 localization.formatTimeIn(input.timeToNextBreak ?? 0)
-            return message
         }
 
-        return message
+        return ""
     }
 
     /// Full port: long-break suffix depends on the `break` setting.

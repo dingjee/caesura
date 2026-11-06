@@ -33,6 +33,10 @@ struct BreakContentView: View {
         var shortcutHint: String
         var localization: Localization
         var imagesDirectory: URL
+        /// The multiplier of the spacing of the poem's lines, captured with the
+        /// settings at the moment the break was prepared (the next break reads
+        /// the changed preference).
+        var poemLineSpacing: Double = PoemSpacing.defaultFactor
         /// The poem of this break (nil when the break shows other content:
         /// custom ideas, a CLI text or no ideas at all).
         var poem: PoemBreakSession?
@@ -202,7 +206,10 @@ struct BreakContentView: View {
     @ViewBuilder
     private func poemText(session: PoemBreakSession, proxy: GeometryProxy) -> some View {
         let width = proxy.size.width * 0.9
-        let spacing = proxy.size.height * 0.012
+        // The base spacing of the window times the reader's multiplier: the
+        // measure, the line centres and the drawn stack all share one value.
+        let spacing = CGFloat(PoemSpacing.spacing(base: Double(proxy.size.height * 0.012),
+                                                  multiplier: model.poemLineSpacing))
         // The room the verses have: the credit and the clock are drawn below
         // them.
         let budget = proxy.size.height * 0.38
@@ -238,6 +245,7 @@ struct BreakContentView: View {
         let contentKey = Self.poemContentKey(lines: lines, width: width,
                                              height: proxy.size.height,
                                              fontSize: layout.fontSize,
+                                             spacing: spacing,
                                              full: session.mode == .full)
         let frontierCenter = mark.frontierLine >= 0 && mark.frontierLine < centers.count
             ? centers[mark.frontierLine] : nil
@@ -300,12 +308,16 @@ struct BreakContentView: View {
     /// The dynamic rules (following, contrast, motion) are NOT part of it:
     /// they travel through the focus controller instead.
     private static func poemContentKey(lines: [String], width: CGFloat, height: CGFloat,
-                                       fontSize: CGFloat, full: Bool) -> AnyHashable {
+                                       fontSize: CGFloat, spacing: CGFloat, full: Bool) -> AnyHashable {
         var hasher = Hasher()
         hasher.combine(lines.joined(separator: "\u{0}"))
         hasher.combine(Int(width.rounded()))
         hasher.combine(Int(height.rounded()))
         hasher.combine(Int(fontSize.rounded()))
+        // The spacing is hashed exactly, like the layout cache keys it must
+        // agree with: a rounded value would let two nearby multipliers share
+        // one hosted poem (and one settled scroll position).
+        hasher.combine(spacing)
         hasher.combine(full)
         return AnyHashable(hasher.finalize())
     }

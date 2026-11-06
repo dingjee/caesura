@@ -99,6 +99,27 @@
   scroller keeps its knob geometry and every interaction, and the reader's
   overlay preference is kept (the drawing subclass declares overlay
   compatibility).
+- The poem's lines breathe a little wider: the body of a poem is laid out at
+  1.2 times the base spacing of the window by default, and Preferences offers
+  a labelled multiplier (1.0–2.0, step 0.1) persisted as a Double. A missing,
+  mistyped or out-of-range value falls back to the default or is clamped, in
+  the store and again at every read. The multiplier is captured with the
+  settings of a break and the reading window reads it when it opens: a new
+  value reaches the next break, and the reading window applies it when it is
+  reopened — without restarting the scheduler or moving the poem's timing.
+  The measurement, the line centres, the drawn stack and the layout/content
+  cache keys share one exact spacing (nearby multipliers that share a rounded
+  value measure two different heights, never one cached layout).
+- The menu bar menu merges the countdown of the next break and the former
+  Skip submenu into two direct items: "Skip n min — start a Mini break now"
+  and "Skip n min — start a Long break now" (natural Chinese wording in the
+  Chinese locale). The minutes are shown only for the type that is planned
+  right now — the scheduler's own countdown — and a type without an exact
+  plan starts without a number; the long break never wears the countdown of
+  the short one. Pause, Do Not Disturb, exclusions, Strict Mode, disabled
+  types and the immediate-skip behaviour are unchanged.
+- Documentation and this changelog entry were drafted with AI assistance
+  (OpenCode) and verified locally by the maintainer.
 - The persistent trial profile lives at
   `~/Library/Application Support/Caesura` and the ordinary native profile at
   `~/Library/Application Support/CaesuraNative`. A first run imports the
@@ -109,6 +130,21 @@
 - The macOS implementation becomes the standalone project's `main` snapshot.
 - Update checks and feedback links target `dingjee/caesura`.
 - Default content is poetry; optional user-provided content remains supported.
+
+### Fixed
+
+- The blurred background of a break follows the wave of the reveal again
+  instead of showing a grey strip: the mask image of the wave now carries the
+  cap insets AppKit needs, so the material mask of the effect view maps the
+  raster onto the window instead of degenerating into a rectangle. The blurred
+  background and the poem are revealed by one and the same disc — at the same
+  global point, with the same feather and the same hidden and full endpoints —
+  and no part of the background survives outside the wave. The timing of the
+  wave (about 900 ms in, 700 ms out), the pointer-following centre, the plain
+  fade of Reduced Motion and the cancellation of a running wave are unchanged.
+- This fix and its documentation were written with AI assistance (OpenCode)
+  and verified locally; the check renders the mask of the real AppKit
+  consumer offscreen and compares it with the mask of the poem.
 
 ### Removed
 

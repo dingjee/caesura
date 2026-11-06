@@ -759,6 +759,7 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
             shortcutHint: Utils.formatKeyboardShortcut(settings.getString("endBreakShortcut")),
             localization: localization,
             imagesDirectory: AppPaths.imagesDirectory(),
+            poemLineSpacing: PoemSpacing.factor(settings: settings),
             poem: poem
         )
     }
@@ -1588,7 +1589,8 @@ final class AppCoordinator: NSObject, NSApplicationDelegate {
                               backing: .buffered, defer: false)
         window.title = localization.t("main.todaysPoem")
         window.contentView = NSHostingView(rootView: PoemWindowView(poem: poem,
-                                                                    imagesDirectory: AppPaths.imagesDirectory()))
+                                                                     imagesDirectory: AppPaths.imagesDirectory(),
+                                                                     lineSpacingFactor: PoemSpacing.factor(settings: settings)))
         window.center()
         let owner = OwnedWindow(window: window)
         owner.onClosed = { [weak self, weak owner, weak window] in

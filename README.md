@@ -17,10 +17,17 @@ reading. Source and feedback: [dingjee/caesura](https://github.com/dingjee/caesu
 ## Using Caesura
 
 Launch `Caesura.app` and look for the two-slash menu bar icon. The menu opens
-Preferences, the current poem, and pause/resume controls. By default, a short
+Preferences, the current poem, and pause/resume controls. While breaks run, it
+also offers one direct item per break type — "Skip n min — start a Mini/Long
+break now" — that starts that break at once; the minutes are shown only for
+the type that is planned right now, and a type without an exact plan starts
+without a number. By default, a short
 pause lasts 20 seconds and starts every 10 minutes; every third pause is a
 5-minute long pause. Preferences changes the schedule, displays, background,
-sounds and the number of full-poem repetitions (0–9, default 2).
+sounds, the number of full-poem repetitions (0–9, default 2) and the poem
+line spacing (a 1.0–2.0 multiplier of the base spacing, default 1.2 — a new
+value reaches the next break, and the reading window applies it when it is
+reopened).
 
 The catalog contains 465 public-domain poems. Seasonal lines and author
 anniversaries influence selection. Opening **Current poem** reads the full text
@@ -70,8 +77,10 @@ per frame, every display shares that one centre, and the wave covers the last
 corner of the last display from wherever the pointer is. The wave never
 repeats itself and never bounces. When the break ends, the pointer is read
 again and the wave contracts towards it. Between the waves nothing is read at
-all. Reduced Motion presents and dismisses the break with a short fade instead
-of the wave, and Reduced Transparency keeps an opaque, readable background
+all. The blurred background and the poem are revealed by one and the same
+disc, so no part of the background survives outside the wave. Reduced Motion
+presents and dismisses the break with a short fade instead of
+the wave, and Reduced Transparency keeps an opaque, readable background
 behind the poem. Every transition of the app — the reveal of the break, the
 brightness handover between the lines of a poem and the small feedback of the
 menu bar — answers to one shared set of durations and one small family of
@@ -99,7 +108,11 @@ executable; this package does not use `swift test`. `radial-mask-test.sh`
 compiles the actual mask raster of the break reveal together with a small
 pixel check and asserts its real pixels — the opaque centre, the clear
 exterior, the feathered edge, the exact hidden and full endpoints and the
-bounded allocation. It renders offscreen and never shows a window. The
+bounded allocation. It renders the mask of the real AppKit consumer
+(`NSVisualEffectView.maskImage`) offscreen as well and compares it with the
+mask of the poem: the blurred background has to follow the very same disc,
+without a strip outside the wave. It renders offscreen and never shows a
+window. The
 offscreen probe (`CAESURA_POEM_PROBE=<directory>`) renders the poem, the
 reading viewport and the reveal into images
 and a JSON report, again without showing a window. Build scripts select an
@@ -177,8 +190,11 @@ The local trial retains bundle ID `net.hovancik.stretchly.trial` and profile
 `~/Library/Application Support/Caesura`. These are deliberately stable
 migration identifiers; the application is visibly named **Caesura**. The
 ordinary package uses `io.github.dingjee.caesura` and
-`~/Library/Application Support/CaesuraNative`. Existing migration backups
-under `~/Library/Application Support/Caesura/Migration Backup/` are preserved.
+`~/Library/Application Support/CaesuraNative`. On 2026-11-03 the two previous
+native directories (`StretchlyNativeTrial`, `StretchlyNative`) were migrated
+into this layout by the explicit maintenance helper
+`native/scripts/migrate-local-profiles.py` and retired; recoverable copies of
+both stay under `~/Library/Application Support/Caesura/Migration Backup/`.
 When a checkout itself has moved, `CAESURA_RETIRED_TRIAL_APP` can identify the
 former trial URL for exact login-registration retirement. The maintenance
 helper uses ServiceManagement without starting a scheduler or opening windows.

@@ -71,6 +71,20 @@ public final class SettingsStore {
         return range.contains(whole) ? whole : fallback
     }
 
+    /// The value of a multiplier with a range: a finite number inside the range
+    /// of the key, clamped into it.
+    ///
+    /// A missing key and a value of the wrong type fall back to the default of
+    /// the key; a value outside the range is clamped into it. The storage
+    /// already applies the same rule when the file is read; this is the second
+    /// line of defence for values that reached the store another way.
+    public func getBoundedDouble(_ key: String) -> Double {
+        let fallback = DefaultSettings.values[key]?.doubleValue ?? 0
+        guard let range = SettingsPolicy.boundedDoubleKeys[key] else { return fallback }
+        guard let raw = values[key]?.doubleValue, raw.isFinite else { return fallback }
+        return min(max(raw, range.lowerBound), range.upperBound)
+    }
+
     public func getArray(_ key: String) -> [SettingsValue] { values[key]?.arrayValue ?? [] }
 
     public func setObject(_ key: String, anyObject: [String: Any]) {

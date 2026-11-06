@@ -299,8 +299,11 @@ final class BreakRevealDriver {
                                                      radius: radius,
                                                      feather: CGFloat(plan.feather),
                                                      bounds: bounds) else { return }
+            // The material mask needs the cap insets of the image: without
+            // them AppKit builds a degenerate mask layer and the blurred
+            // background is revealed wrongly (see `RadialMaskImage`).
             entry.window.applyRevealMask(
-                maskImage: NSImage(cgImage: image, size: bounds.size),
+                maskImage: RadialMaskImage.make(cgImage: image, size: bounds.size),
                 contentImage: image)
         }
     }

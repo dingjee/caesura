@@ -22,7 +22,11 @@
     "continue": "Continue",
     "cancel": "Cancel",
     "preferences": "Preferences",
-    "todaysPoem": "Current poem"
+    "todaysPoem": "Current poem",
+    "skipMiniBreakNow": "Start a Mini break now",
+    "skipLongBreakNow": "Start a Long break now",
+    "skipMiniBreakIn": "Skip {{minutes}} min — start a Mini break now",
+    "skipLongBreakIn": "Skip {{minutes}} min — start a Long break now"
   },
   "break": {
     "postpone": "Postpone this break",
@@ -56,7 +60,8 @@
       "language": "Select language:",
       "restoreDefaults": "Restore defaults",
       "poemFullRepeats": "Repeat the complete poem",
-      "poemFullRepeatsInfo": "How often the whole poem is shown again after it was read completely, before the next poem follows."
+      "poemFullRepeatsInfo": "How often the whole poem is shown again after it was read completely, before the next poem follows.",
+      "poemLineSpacing": "Poem line spacing"
     },
     "schedule": {
       "miniBreaks": "Mini breaks:",
