@@ -20,7 +20,7 @@ Issue: #
 - [ ] `native/scripts/test.sh` compiles successfully and its core tests pass.
 - [ ] `native/scripts/package-app.sh` builds and verifies the app; architectures checked are listed below.
 - [ ]  GUI checks, if needed, used a temporary profile and a secondary display without activation or sounds; skipped checks are explained below.
-- [ ]  the persistent trial was refreshed with `native/scripts/install-dist.sh` and `native/scripts/clean.sh --apply` completed without losing user data.
+- [ ]  the persistent trial was refreshed with `native/scripts/install-dist.sh` for a major application change or explicit request (otherwise the skipped build is noted), and `native/scripts/clean.sh --apply` completed without losing user data.
 - [ ]  AI assistance is disclosed and the contributor understands and can maintain the changes.
 - [ ]  README and CHANGELOG were updated accordingly.
 - [ ]  after PR is approved, all commits in it are [squashed](https://gitbetter.substack.com/p/how-to-squash-git-commits)

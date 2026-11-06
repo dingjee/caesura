@@ -8,7 +8,7 @@ including its linked Issue and Verification Process. Follow the
 
 Use Swift with Foundation-only logic in `CaesuraCore`, AppKit and SwiftUI in
 `CaesuraApp`. Follow local style and keep changes focused. Support macOS 13+,
-Apple Silicon and Intel, accessibility and low background resource usage.
+Apple Silicon (arm64) only, accessibility and low background resource usage.
 Keep the poetry experience quiet and preserve user settings, assets and progress.
 
 Run checks appropriate to the implementation:
@@ -16,12 +16,17 @@ Run checks appropriate to the implementation:
 - `native/scripts/test.sh` compiles and runs the custom core test executable;
   use this instead of `swift test`.
 - `native/scripts/package-app.sh` builds and verifies a signed package.
-  `CAESURA_NATIVE_UNIVERSAL=1` checks both architectures.
+  The sources are shared and carry no architecture-specific code, but
+  releases are packaged arm64-only: `CAESURA_NATIVE_UNIVERSAL=1` is refused,
+  and the verification accepts nothing but arm64.
 - `native/scripts/verify-app.sh <bundle>` inspects a package without launching it.
 - GUI checks require temporary profiles, a secondary display, no activation and
   no audible sounds. Skip them if the secondary display is unavailable.
-- Refresh the persistent application with `native/scripts/install-dist.sh`.
-  Keep one verified, usable trial and never reset an existing profile.
+- Refresh the persistent application with `native/scripts/install-dist.sh` after
+  a major application change or on explicit request; routine changes need no new
+  build. Keep one verified, usable trial and never reset an existing profile.
+  The trial stays in `dist/` — no `/Applications` copy, alias or symlink is
+  created.
 - Run `native/scripts/clean.sh --apply` as the final maintenance step.
 
 For scheduling/settings changes, trace captured settings, cancellation and
