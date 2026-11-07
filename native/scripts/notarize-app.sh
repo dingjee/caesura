@@ -41,7 +41,11 @@ IDENTITY="$(resolve_sign_identity)"
 # The hardened runtime is a precondition of the notary, not a preference.
 for bin in caesura-cli Caesura; do
   if [[ -x "$APP/Contents/MacOS/$bin" ]]; then
-    codesign -dv "$APP/Contents/MacOS/$bin" 2>&1 | grep -q 'runtime' || {
+    # The flags are read into a variable: a `grep -q` on the pipe would end
+    # the read early, codesign would die of SIGPIPE and, under pipefail, a
+    # perfectly signed binary would be judged unsigned.
+    flags="$(codesign -dv "$APP/Contents/MacOS/$bin" 2>&1)"
+    [[ "$flags" == *"runtime)"* ]] || {
       echo "FAIL: $bin is signed without the hardened runtime; package it again with the Developer ID identity" >&2
       exit 1
     }
